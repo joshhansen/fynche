@@ -20,7 +20,7 @@ def all_colors():
             yield color
 
 if __name__=='__main__':
-    output_dir = '/home/jjfresh/Courses/cs673/cs673svn/data/colors'
+    output_dir = './data/colors'
     if not os.path.exists(output_dir): os.mkdir(output_dir)
     
     count = 0

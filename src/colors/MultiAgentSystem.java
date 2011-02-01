@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import colors.agents.Agent;
+
 public class MultiAgentSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static MultiAgentSystem system;
