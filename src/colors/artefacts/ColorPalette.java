@@ -1,10 +1,10 @@
-package colors;
+package colors.artefacts;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ColorPalette extends Artefact {
+public class ColorPalette implements Artefact {
 	private static final long serialVersionUID = 1L;
 	private final Set<NamedColor> colors = new HashSet<NamedColor>();
 	private final String name;

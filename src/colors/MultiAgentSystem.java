@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import colors.agents.Agent;
+import colors.agents.DumbAgent;
+import colors.artefacts.Artefact;
 
 public class MultiAgentSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -19,6 +21,10 @@ public class MultiAgentSystem implements Serializable {
 	
 	private int round = 0;
 	private MultiAgentSystem() {
+	}
+	
+	public int round() {
+		return round;
 	}
 	
 	private final Set<Agent> agents = new HashSet<Agent>();
@@ -56,8 +62,22 @@ public class MultiAgentSystem implements Serializable {
 		run(1);
 	}
 	
+	public void dumpResult() {
+		for(Agent agent : agents) {
+			System.out.println("Agent: " + agent);
+			for(int i = 0; i < round; i++) {
+				for(Artefact a : agent.publishedArtefacts(i)) {
+					System.out.println("\t" + i + "\t" + a);
+				}
+			}
+		}
+	}
+	
 	public static void main(String[] args) {
 		final MultiAgentSystem sys = new MultiAgentSystem();
-		
+		sys.addAgent(new DumbAgent(sys));
+		sys.addAgent(new DumbAgent(sys));
+		sys.run(10);
+		sys.dumpResult();
 	}
 }

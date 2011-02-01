@@ -1,8 +1,8 @@
-package colors;
+package colors.artefacts;
 
 import java.awt.Color;
 
-public class NamedColor extends Artefact {
+public class NamedColor implements Artefact {
 	private static final long serialVersionUID = 1L;
 	private final Color color;
 	private final String name;
@@ -17,5 +17,9 @@ public class NamedColor extends Artefact {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String toString() {
+		return "NamedColor[(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")," + name + "]";
 	}
 }

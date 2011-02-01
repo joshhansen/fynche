@@ -1,25 +1,59 @@
 package colors.agents;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Set;
 
-import colors.Artefact;
+import colors.MultiAgentSystem;
 import colors.Rating;
+import colors.artefacts.Artefact;
 
 public interface Agent extends Serializable {
-	public abstract void roundStart();
+	/**
+	 * The parent system in which this agent is operating
+	 * @return The system
+	 */
+	public MultiAgentSystem system();
 	
-	public abstract void create();
+	/**
+	 * Run before the simulation begins
+	 */
+	public void setUp();
 	
-	public abstract void rate();
+	/**
+	 * Run at the start of each simulation round
+	 */
+	public void roundStart();
 	
-	public abstract void roundFinish();
+	/**
+	 * The first major step in each simulation round. Brings about creation and publication
+	 * of artefacts.
+	 */
+	public void create();
 	
-	public abstract Set<Artefact> publishedArtefacts();
+	/**
+	 * The second major step in each simulation round. Brings about creation of ratings,
+	 * by which this agent rates the work of other agents.
+	 */
+	public void rate();
 	
-	public abstract Set<Artefact> publishedArtefacts(final int roundNum);
+	/**
+	 * Run at the end of each simulation round
+	 */
+	public void roundFinish();
 	
-	public abstract Set<Rating> ratings();
+	/**
+	 * Run after the simulation completes
+	 */
+	public void takeDown();
 	
-	public abstract Set<Rating> ratings(final int roundNum);
+	public Set<Artefact> publishedArtefacts();
+	
+	public Set<Artefact> publishedArtefacts(final int roundNum);
+	
+	public Set<Rating> ratings();
+	
+	public Set<Rating> ratings(final int roundNum);
+	
+	public Map<Agent,Double> affinities();
 }
