@@ -1,6 +1,7 @@
 package colors.artefacts.pubdec;
 
-import colors.artefacts.Artefact;
+import colors.interfaces.Artefact;
+import colors.interfaces.PublicationDecider;
 
 public class ExuberantPublicationDecider implements PublicationDecider {
 	@Override

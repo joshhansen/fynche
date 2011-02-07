@@ -1,4 +1,4 @@
-package colors.artefacts;
+package colors.interfaces;
 
 import java.io.Serializable;
 

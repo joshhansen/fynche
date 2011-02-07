@@ -2,7 +2,8 @@ package colors.affinities;
 
 import java.util.Map;
 
-import colors.agents.Agent;
+import colors.interfaces.AffinityUpdater;
+import colors.interfaces.Agent;
 
 public class NullAffinityUpdater implements AffinityUpdater {
 

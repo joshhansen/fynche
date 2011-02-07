@@ -2,6 +2,8 @@ package colors.artefacts;
 
 import java.awt.Color;
 
+import colors.interfaces.Artefact;
+
 public class NamedColor implements Artefact {
 	private static final long serialVersionUID = 1L;
 	private final Color color;

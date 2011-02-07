@@ -1,6 +1,7 @@
 package colors.artefacts.generators;
 
-import colors.artefacts.Artefact;
+import colors.interfaces.Artefact;
+import colors.interfaces.ArtefactGenerator;
 
 public class NullArtefactGenerator implements ArtefactGenerator {
 	@Override

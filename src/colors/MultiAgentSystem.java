@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import colors.agents.Agent;
 import colors.agents.DumbAgent;
-import colors.artefacts.Artefact;
+import colors.interfaces.Agent;
+import colors.interfaces.Artefact;
 
 public class MultiAgentSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -75,6 +75,9 @@ public class MultiAgentSystem implements Serializable {
 	
 	public static void main(String[] args) {
 		final MultiAgentSystem sys = new MultiAgentSystem();
+//		Agent a = new 
+		sys.addAgent(new DumbAgent(sys));
+		sys.addAgent(new DumbAgent(sys));
 		sys.addAgent(new DumbAgent(sys));
 		sys.addAgent(new DumbAgent(sys));
 		sys.run(10);

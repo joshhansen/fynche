@@ -1,42 +1,26 @@
 package colors.agents;
 
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-
 import colors.MultiAgentSystem;
-import colors.artefacts.Artefact;
-import colors.artefacts.NamedColor;
+import colors.affinities.NullAffinityUpdater;
+import colors.affinities.RandomAffinityInitializer;
+import colors.artefacts.generators.RandomNamedColorGenerator;
+import colors.artefacts.genplans.FixedGenerationPlanner;
+import colors.artefacts.pubdec.ExuberantPublicationDecider;
+import colors.prefs.NullPreferenceInitializer;
+import colors.prefs.NullPreferenceUpdater;
+import colors.ratings.NullRatingStrategy;
 
-public class DumbAgent extends AbstractAgent {
+public class DumbAgent extends ModularAgent {
 	private static final long serialVersionUID = 1L;
-	
 	public DumbAgent(MultiAgentSystem sys) {
-		super(sys);
-	}
-	
-	
-	@Override
-	public void roundStart() {}
-
-	@Override
-	public void rate() {}
-	
-	@Override
-	public void roundFinish() {}
-
-	@Override
-	protected int numArtefactsToGenerate() {
-		return 1;
-	}
-
-	@Override
-	protected boolean shouldPublish(Artefact a) {
-		return true;
+		super(sys,
+				new FixedGenerationPlanner(1),
+				new RandomNamedColorGenerator(),
+				new ExuberantPublicationDecider(),
+				new NullRatingStrategy(),
+				new RandomAffinityInitializer(),
+				new NullAffinityUpdater(),
+				new NullPreferenceInitializer(),
+				new NullPreferenceUpdater());
 	}
 }

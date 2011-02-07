@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import colors.interfaces.Artefact;
+
 public class ColorPalette implements Artefact {
 	private static final long serialVersionUID = 1L;
 	private final Set<NamedColor> colors = new HashSet<NamedColor>();

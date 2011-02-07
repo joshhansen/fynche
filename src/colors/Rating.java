@@ -2,7 +2,7 @@ package colors;
 
 import java.io.Serializable;
 
-import colors.artefacts.Artefact;
+import colors.interfaces.Artefact;
 
 public class Rating implements Serializable {
 	private static final long serialVersionUID = 1L;

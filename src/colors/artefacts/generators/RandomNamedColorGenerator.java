@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import colors.artefacts.NamedColor;
+import colors.interfaces.ArtefactGenerator;
 
 public class RandomNamedColorGenerator implements ArtefactGenerator {	
 	private static List<String> readAsList(final String filename) {

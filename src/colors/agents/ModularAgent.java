@@ -1,28 +1,39 @@
 package colors.agents;
 
 import colors.MultiAgentSystem;
-import colors.affinities.AffinityInitializer;
-import colors.affinities.AffinityUpdater;
-import colors.artefacts.Artefact;
-import colors.artefacts.generators.ArtefactGenerator;
-import colors.artefacts.genplans.GenerationPlanner;
-import colors.artefacts.pubdec.PublicationDecider;
-import colors.ratings.RatingStrategy;
+import colors.interfaces.AffinityInitializer;
+import colors.interfaces.AffinityUpdater;
+import colors.interfaces.Agent;
+import colors.interfaces.Artefact;
+import colors.interfaces.ArtefactGenerator;
+import colors.interfaces.GenerationPlanner;
+import colors.interfaces.PreferenceInitializer;
+import colors.interfaces.PreferenceUpdater;
+import colors.interfaces.PublicationDecider;
+import colors.interfaces.RatingStrategy;
 
 public class ModularAgent extends AbstractAgent {
 	private static final long serialVersionUID = 1L;
 	
 	private final AffinityInitializer affinityIniter;
+	private final AffinityUpdater affinityUpdater;
 	private final GenerationPlanner genPlan;
 	private final PublicationDecider pubDec;
 	private final ArtefactGenerator artGen;
-	private final AffinityUpdater affinityUpdater;
 	private final RatingStrategy ratingStrategy;
-
-	public ModularAgent(MultiAgentSystem sys,
-			AffinityInitializer affinityIniter, GenerationPlanner genPlan,
-			PublicationDecider pubDec, ArtefactGenerator artGen,
-			AffinityUpdater affinityUpdater, RatingStrategy ratingStrategy) {
+	private final PreferenceInitializer prefIniter;
+	private final PreferenceUpdater prefUpdater;
+	
+	public ModularAgent(
+			MultiAgentSystem sys,
+			GenerationPlanner genPlan,
+			ArtefactGenerator artGen,
+			PublicationDecider pubDec, 
+			RatingStrategy ratingStrategy,
+			AffinityInitializer affinityIniter,
+			AffinityUpdater affinityUpdater, 
+			PreferenceInitializer prefIniter,
+			PreferenceUpdater prefUpdater) {
 		super(sys);
 		this.affinityIniter = affinityIniter;
 		this.genPlan = genPlan;
@@ -30,11 +41,16 @@ public class ModularAgent extends AbstractAgent {
 		this.artGen = artGen;
 		this.affinityUpdater = affinityUpdater;
 		this.ratingStrategy = ratingStrategy;
+		this.prefIniter = prefIniter;
+		this.prefUpdater = prefUpdater;
 	}
 
 	@Override
 	public void setUp() {
 		affinities = affinityIniter.initialAffinities(this);
+		for(Agent other : sys.agents()) {
+			preferenceModels.put(other, prefIniter.initialPreferences(this, other));
+		}
 	}
 	
 	@Override
@@ -58,6 +74,9 @@ public class ModularAgent extends AbstractAgent {
 	@Override
 	public void roundFinish() {
 		affinities = affinityUpdater.newAffinities(this);
+		for(Agent other : sys.agents()) {
+			preferenceModels.put(other, prefUpdater.newPreferences(this, other));
+		}
 	}
 
 	@Override

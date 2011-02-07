@@ -1,6 +1,7 @@
 package colors.ratings;
 
-import colors.agents.Agent;
+import colors.interfaces.Agent;
+import colors.interfaces.RatingStrategy;
 
 public class NullRatingStrategy implements RatingStrategy {
 	@Override

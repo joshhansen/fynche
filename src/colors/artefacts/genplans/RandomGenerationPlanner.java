@@ -2,7 +2,8 @@ package colors.artefacts.genplans;
 
 import java.util.Random;
 
-import colors.agents.Agent;
+import colors.interfaces.Agent;
+import colors.interfaces.GenerationPlanner;
 
 public class RandomGenerationPlanner implements GenerationPlanner {
 	private final int max;

@@ -1,6 +1,5 @@
-package colors.artefacts.pubdec;
+package colors.interfaces;
 
-import colors.artefacts.Artefact;
 
 public interface PublicationDecider {
 	public boolean shouldPublish(final Artefact artefact);

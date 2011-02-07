@@ -8,7 +8,10 @@ import java.util.Set;
 
 import colors.MultiAgentSystem;
 import colors.Rating;
-import colors.artefacts.Artefact;
+import colors.interfaces.Agent;
+import colors.interfaces.Artefact;
+import colors.interfaces.PreferenceModel;
+import colors.prefs.NullPreferenceModel;
 
 public abstract class AbstractAgent implements Agent {
 	private static final long serialVersionUID = 1L;
@@ -38,6 +41,7 @@ public abstract class AbstractAgent implements Agent {
 	
 	protected final MultiAgentSystem sys;
 	protected Map<Agent,Double> affinities = new HashMap<Agent,Double>();
+	protected Map<Agent,PreferenceModel> preferenceModels = new HashMap<Agent,PreferenceModel>();
 	protected final PartitionedSet<Artefact,Integer> publishedArtefacts = new PartitionedSet<Artefact,Integer>();
 	protected final PartitionedSet<Rating,Integer> ratings = new PartitionedSet<Rating,Integer>();
 
@@ -73,6 +77,16 @@ public abstract class AbstractAgent implements Agent {
 	public Map<Agent, Double> affinities() {
 		return affinities;
 	}
+
+	public Map<Agent, PreferenceModel> preferenceModels() {
+		return preferenceModels;
+	}
+	
+	
+	
+//	public PreferenceModel preferences() {
+//		return prefs;
+//	}
 	
 //	public void create() {
 //		for(int i = 0; i < numArtefactsToGenerate(); i++) {

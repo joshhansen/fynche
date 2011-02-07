@@ -1,6 +1,7 @@
 package colors.artefacts.genplans;
 
-import colors.agents.Agent;
+import colors.interfaces.Agent;
+import colors.interfaces.GenerationPlanner;
 
 public class NullGenerationPlanner implements GenerationPlanner {
 	@Override
