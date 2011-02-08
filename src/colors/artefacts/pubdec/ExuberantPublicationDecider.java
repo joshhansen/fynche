@@ -1,7 +1,7 @@
 package colors.artefacts.pubdec;
 
-import colors.Factory;
 import colors.interfaces.Artefact;
+import colors.interfaces.Factory;
 import colors.interfaces.PublicationDecider;
 
 public class ExuberantPublicationDecider implements PublicationDecider {

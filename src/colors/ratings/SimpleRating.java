@@ -1,6 +1,7 @@
-package colors;
+package colors.ratings;
 
 import colors.interfaces.Artefact;
+import colors.interfaces.Rating;
 
 public class SimpleRating implements Rating {
 	private static final long serialVersionUID = 1L;

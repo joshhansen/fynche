@@ -7,12 +7,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import weka.estimators.KernelEstimator;
-import colors.Counter;
 import colors.artefacts.NamedColor;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.PreferenceModel;
 import colors.interfaces.PreferenceUpdater;
+import colors.util.Counter;
 
 public class IndependentKDEPreferenceUpdater implements PreferenceUpdater {
 	private static Pattern tokenRegex = Pattern.compile("[a-z]+");

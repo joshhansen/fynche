@@ -1,7 +1,7 @@
 package colors.ratings;
 
-import colors.Factory;
 import colors.interfaces.Agent;
+import colors.interfaces.Factory;
 import colors.interfaces.RatingGenerator;
 
 public class NullRatingStrategy implements RatingGenerator {

@@ -8,11 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 import colors.MultiAgentSystem;
-import colors.SimpleRating;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.PreferenceModel;
-import colors.prefs.NullPreferenceModel;
+import colors.ratings.SimpleRating;
 
 public abstract class AbstractAgent implements Agent {
 	private static final long serialVersionUID = 1L;

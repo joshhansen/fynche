@@ -3,9 +3,8 @@ package colors.ratings;
 import java.util.Collections;
 import java.util.Set;
 
-import colors.Factory;
-import colors.SimpleRating;
 import colors.interfaces.Agent;
+import colors.interfaces.Factory;
 import colors.interfaces.RatingInitializer;
 
 public class NullRatingInitializer implements RatingInitializer {

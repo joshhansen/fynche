@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import colors.MultiAgentSystem;
-import colors.SimpleRating;
+import colors.ratings.SimpleRating;
 
 public interface Agent extends Serializable {
 	/**

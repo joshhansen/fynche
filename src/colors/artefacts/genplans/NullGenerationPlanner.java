@@ -1,7 +1,7 @@
 package colors.artefacts.genplans;
 
-import colors.Factory;
 import colors.interfaces.Agent;
+import colors.interfaces.Factory;
 import colors.interfaces.GenerationPlanner;
 
 public class NullGenerationPlanner implements GenerationPlanner {

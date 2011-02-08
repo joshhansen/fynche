@@ -1,8 +1,7 @@
-package colors;
+package colors.interfaces;
 
 import java.io.Serializable;
 
-import colors.interfaces.Artefact;
 
 public interface Rating extends Serializable {
 

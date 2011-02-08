@@ -1,4 +1,4 @@
-package colors;
+package colors.util;
 
 import java.util.Collection;
 import java.util.HashMap;

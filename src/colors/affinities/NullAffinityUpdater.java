@@ -2,9 +2,9 @@ package colors.affinities;
 
 import java.util.Map;
 
-import colors.Factory;
 import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
+import colors.interfaces.Factory;
 
 public class NullAffinityUpdater implements AffinityUpdater {
 	public static Factory<AffinityUpdater> factory() {

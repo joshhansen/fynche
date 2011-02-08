@@ -1,8 +1,8 @@
 package colors.artefacts.generators;
 
-import colors.Factory;
 import colors.interfaces.Artefact;
 import colors.interfaces.ArtefactGenerator;
+import colors.interfaces.Factory;
 
 public class NullArtefactGenerator implements ArtefactGenerator {
 	public static Factory<ArtefactGenerator> factory() {

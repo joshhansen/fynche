@@ -3,10 +3,10 @@ package colors.artefacts;
 import java.util.Collections;
 import java.util.Set;
 
-import colors.Factory;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.ArtefactInitializer;
+import colors.interfaces.Factory;
 
 public class NullArtefactInitializer implements ArtefactInitializer {
 	public static Factory<ArtefactInitializer> factory() {

@@ -1,6 +1,5 @@
 package colors.agents;
 
-import colors.Factory;
 import colors.MultiAgentSystem;
 import colors.affinities.NullAffinityUpdater;
 import colors.affinities.RandomAffinityInitializer;
@@ -13,6 +12,7 @@ import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
 import colors.interfaces.ArtefactGenerator;
 import colors.interfaces.ArtefactInitializer;
+import colors.interfaces.Factory;
 import colors.interfaces.GenerationPlanner;
 import colors.interfaces.PreferenceInitializer;
 import colors.interfaces.PreferenceUpdater;

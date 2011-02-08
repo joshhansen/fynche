@@ -1,7 +1,7 @@
 package colors.prefs;
 
-import colors.Factory;
 import colors.interfaces.Agent;
+import colors.interfaces.Factory;
 import colors.interfaces.PreferenceInitializer;
 import colors.interfaces.PreferenceModel;
 

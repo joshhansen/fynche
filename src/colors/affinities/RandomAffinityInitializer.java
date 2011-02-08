@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import colors.Factory;
 import colors.interfaces.AffinityInitializer;
 import colors.interfaces.Agent;
+import colors.interfaces.Factory;
 
 public class RandomAffinityInitializer implements AffinityInitializer {
 	public static Factory<AffinityInitializer> factory() {

@@ -12,6 +12,7 @@ import colors.artefacts.RandomAgentArtefactInitializer;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.ArtefactInitializer;
+import colors.interfaces.Factory;
 import colors.interfaces.PreferenceUpdater;
 import colors.prefs.IndependentKDEPreferenceUpdater;
 
