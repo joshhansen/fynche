@@ -17,11 +17,7 @@ import colors.prefs.IndependentKDEPreferenceUpdater;
 
 public class MultiAgentSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private static Logger log = Logger.getLogger("colors");
-	static {
-		System.out.println("YAH");
-		log.setLevel(Level.FINE);
-	}
+	
 	private static MultiAgentSystem system;
 	public static MultiAgentSystem instance() {
 		if(system==null)
@@ -52,6 +48,8 @@ public class MultiAgentSystem implements Serializable {
 	 * @param iterations How many iterations to run for
 	 */
 	public void run(final int iterations) {
+		final Logger log = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+		log.setLevel(Level.FINE);
 		log.info("Going to run for " + iterations + " iterations");
 		for(Agent agent : agents) {
 			log.info("Setting up agent " + agent);
