@@ -1,6 +1,6 @@
 package colors.interfaces;
 
 
-public interface RatingStrategy {
+public interface RatingGenerator {
 	public void rate(final Agent rater);
 }

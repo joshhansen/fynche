@@ -1,5 +1,6 @@
 package colors.agents;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import colors.MultiAgentSystem;
-import colors.Rating;
+import colors.SimpleRating;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.PreferenceModel;
@@ -19,15 +20,21 @@ public abstract class AbstractAgent implements Agent {
 	protected static class PartitionedSet<T,P> {
 		private final Set<T> all = new HashSet<T>();
 		private final Map<P,Set<T>> byRound = new HashMap<P,Set<T>>();
-		public void add(final T artefact, final P round) {
-			all.add(artefact);
+		public void add(final T item, final P partition) {
+			all.add(item);
 			
-			Set<T> set = byRound.get(round);
+			Set<T> set = byRound.get(partition);
 			if(set == null) {
 				set = new HashSet<T>();
-				byRound.put(round, set);
+				byRound.put(partition, set);
 			}
-			set.add(artefact);
+			set.add(item);
+		}
+		
+		public void add(final Collection<T> items, final P partition) {
+			for(T item : items) {
+				add(item, partition);
+			}
 		}
 		
 		public Set<T> all() {
@@ -35,7 +42,11 @@ public abstract class AbstractAgent implements Agent {
 		}
 		
 		public Set<T> partition(final P round) {
-			return Collections.unmodifiableSet(byRound.get(round));
+			Set<T> got = byRound.get(round);
+			if(got == null)
+				return Collections.emptySet();
+			else
+				return Collections.unmodifiableSet(got);
 		}
 	}
 	
@@ -43,7 +54,7 @@ public abstract class AbstractAgent implements Agent {
 	protected Map<Agent,Double> affinities = new HashMap<Agent,Double>();
 	protected Map<Agent,PreferenceModel> preferenceModels = new HashMap<Agent,PreferenceModel>();
 	protected final PartitionedSet<Artefact,Integer> publishedArtefacts = new PartitionedSet<Artefact,Integer>();
-	protected final PartitionedSet<Rating,Integer> ratings = new PartitionedSet<Rating,Integer>();
+	protected final PartitionedSet<SimpleRating,Integer> ratings = new PartitionedSet<SimpleRating,Integer>();
 
 	public AbstractAgent(final MultiAgentSystem sys) {
 		this.sys = sys;
@@ -64,12 +75,12 @@ public abstract class AbstractAgent implements Agent {
 	}
 
 	@Override
-	public Set<Rating> ratings() {
+	public Set<SimpleRating> ratings() {
 		return ratings.all();
 	}
 
 	@Override
-	public Set<Rating> ratings(int roundNum) {
+	public Set<SimpleRating> ratings(int roundNum) {
 		return ratings.partition(roundNum);
 	}
 	

@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import colors.MultiAgentSystem;
-import colors.Rating;
+import colors.SimpleRating;
 
 public interface Agent extends Serializable {
 	/**
@@ -50,9 +50,9 @@ public interface Agent extends Serializable {
 	
 	public Set<Artefact> publishedArtefacts(final int roundNum);
 	
-	public Set<Rating> ratings();
+	public Set<SimpleRating> ratings();
 	
-	public Set<Rating> ratings(final int roundNum);
+	public Set<SimpleRating> ratings(final int roundNum);
 	
 	public Map<Agent,Double> affinities();
 	
