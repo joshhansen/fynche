@@ -4,20 +4,24 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import colors.agents.ModularAgentFactory;
 import colors.artefacts.RandomAgentArtefactInitializer;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.ArtefactInitializer;
-import colors.interfaces.Factory;
 import colors.interfaces.PreferenceUpdater;
+import colors.interfaces.RatingGenerator;
 import colors.prefs.IndependentKDEPreferenceUpdater;
+import colors.ratings.EgocentricRatingGenerator;
+import colors.util.Util;
 
 public class MultiAgentSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(MultiAgentSystem.class.getName());
 	
 	private static MultiAgentSystem system;
 	public static MultiAgentSystem instance() {
@@ -49,14 +53,13 @@ public class MultiAgentSystem implements Serializable {
 	 * @param iterations How many iterations to run for
 	 */
 	public void run(final int iterations) {
-		final Logger log = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-		log.setLevel(Level.FINE);
-		log.info("Going to run for " + iterations + " iterations");
+		logger.info("Going to run for " + iterations + " iterations");
 		for(Agent agent : agents) {
-			log.info("Setting up agent " + agent);
+			logger.fine("Setting up agent " + agent);
 			agent.setUp();
 		}
 		for(int i = 0; i < iterations; i++) {
+			logger.info("Starting round " + i);
 			for(Agent agent : agents) {
 				agent.roundStart();
 			}
@@ -91,24 +94,18 @@ public class MultiAgentSystem implements Serializable {
 		}
 	}
 	
-	private static <T> Factory<T> staticFactory(final T object) {
-		return new Factory<T>(){
-			@Override
-			public T instantiate() {
-				return object;
-			}
-		};
-	}
-	
 	public static void main(String[] args) {
+		Util.initLogging();
+//		SimpleFormatter sf;
 		final ColorDB db = new ColorDB("/home/jjfresh/Courses/cs673/colors2.db");
 		
 		final MultiAgentSystem sys = new MultiAgentSystem();
 		final int agentCount = 10;
 		
 		final ModularAgentFactory agentFact = new ModularAgentFactory(sys);
-		agentFact.setPreferenceUpdaterFactory(staticFactory( (PreferenceUpdater) new IndependentKDEPreferenceUpdater()));
-		agentFact.setArtefactInitializerFactory(staticFactory( (ArtefactInitializer) new RandomAgentArtefactInitializer(db, 100)));
+		agentFact.setPreferenceUpdaterFactory(Util.staticFactory( (PreferenceUpdater) new IndependentKDEPreferenceUpdater()));
+		agentFact.setArtefactInitializerFactory(Util.staticFactory( (ArtefactInitializer) new RandomAgentArtefactInitializer(db, 100, 10)));
+		agentFact.setRatingGeneratorFactory(Util.staticFactory( (RatingGenerator) new EgocentricRatingGenerator()));
 		for(int i = 0; i < agentCount; i++) {
 			sys.addAgent(agentFact.instantiate());
 		}

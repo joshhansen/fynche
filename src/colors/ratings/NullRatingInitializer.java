@@ -5,6 +5,7 @@ import java.util.Set;
 
 import colors.interfaces.Agent;
 import colors.interfaces.Factory;
+import colors.interfaces.Rating;
 import colors.interfaces.RatingInitializer;
 
 public class NullRatingInitializer implements RatingInitializer {
@@ -17,7 +18,7 @@ public class NullRatingInitializer implements RatingInitializer {
 		};
 	}
 	@Override
-	public Set<SimpleRating> initialRatings(Agent agent) {
+	public Set<Rating> initialRatings(Agent agent) {
 		return Collections.emptySet();
 	}
 }

@@ -2,11 +2,15 @@ package colors.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.logging.LogManager;
+
+import colors.interfaces.Factory;
 
 public class Util {
 	public static String readFile(final String filename) {
@@ -53,5 +57,29 @@ public class Util {
 			e.printStackTrace();
 		}
 		return text.toString();
+	}
+
+	/**
+	 * Returns a Factory<T> that only ever returns <code>object</code>.
+	 */
+	public static <T> Factory<T> staticFactory(final T object) {
+		return new Factory<T>(){
+			@Override
+			public T instantiate() {
+				return object;
+			}
+		};
+	}
+
+	public static void initLogging() {
+		try {
+			LogManager.getLogManager().readConfiguration(new FileInputStream("logging.properties"));
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

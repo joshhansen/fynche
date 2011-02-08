@@ -82,7 +82,7 @@ public class ModularAgent extends AbstractAgent {
 	
 	@Override
 	public void roundStart() {
-		
+		//Do nothing
 	}
 	
 	public void create() {
@@ -95,7 +95,7 @@ public class ModularAgent extends AbstractAgent {
 	
 	@Override
 	public void rate() {
-		ratingStrategy.rate(this);
+		ratingStrategy.rate(this, ratings);
 	}
 	
 	@Override
@@ -108,6 +108,6 @@ public class ModularAgent extends AbstractAgent {
 
 	@Override
 	public void takeDown() {
-		// TODO Auto-generated method stub
+		//Do nothing
 	}
 }

@@ -8,7 +8,7 @@ import colors.artefacts.genplans.FixedGenerationPlanner;
 import colors.artefacts.pubdec.ExuberantPublicationDecider;
 import colors.prefs.NullPreferenceInitializer;
 import colors.prefs.NullPreferenceUpdater;
-import colors.ratings.NullRatingStrategy;
+import colors.ratings.NullRatingGenerator;
 
 public class DumbAgent extends ModularAgent {
 	private static final long serialVersionUID = 1L;
@@ -17,7 +17,7 @@ public class DumbAgent extends ModularAgent {
 				new FixedGenerationPlanner(1),
 				new RandomNamedColorGenerator(),
 				new ExuberantPublicationDecider(),
-				new NullRatingStrategy(),
+				new NullRatingGenerator(),
 				new RandomAffinityInitializer(),
 				new NullAffinityUpdater(),
 				new NullPreferenceInitializer(),

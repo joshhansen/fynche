@@ -19,8 +19,10 @@ public class RandomAgentArtefactInitializer implements ArtefactInitializer {
 	private final ColorDB db;
 	private final List<Integer> topNids;
 	private static final Random rand = new Random();
-	public RandomAgentArtefactInitializer(final ColorDB db, final int topN) {
+	private final int maxArtefacts;
+	public RandomAgentArtefactInitializer(final ColorDB db, final int topN, final int maxArtefacts) {
 		this.db = db;
+		this.maxArtefacts = maxArtefacts;
 		
 		List<Integer> ids = new ArrayList<Integer>();
 		try {
@@ -44,8 +46,10 @@ public class RandomAgentArtefactInitializer implements ArtefactInitializer {
 		Iterator<Integer> colorIDs = db.getUserColorIDs(id);
 		
 		Set<Artefact> arts = new HashSet<Artefact>();
-		while(colorIDs.hasNext()) {
+		int i = 0;
+		while(colorIDs.hasNext() && i < maxArtefacts) {
 			arts.add(db.getColor(colorIDs.next()));
+			i++;
 		}
 		return arts;
 	}

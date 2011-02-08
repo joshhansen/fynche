@@ -22,7 +22,7 @@ import colors.interfaces.RatingGenerator;
 import colors.prefs.NullPreferenceInitializer;
 import colors.prefs.NullPreferenceUpdater;
 import colors.ratings.NullRatingInitializer;
-import colors.ratings.NullRatingStrategy;
+import colors.ratings.NullRatingGenerator;
 
 public class ModularAgentFactory implements Factory<Agent> {
 	private Factory<GenerationPlanner> generationPlannerFactory = NullGenerationPlanner.factory();
@@ -33,7 +33,7 @@ public class ModularAgentFactory implements Factory<Agent> {
 	private Factory<ArtefactGenerator> artefactGeneratorFactory = NullArtefactGenerator.factory();
 	
 	private Factory<RatingInitializer> ratingInitializerFactory = NullRatingInitializer.factory();
-	private Factory<RatingGenerator> ratingStrategyFactory = NullRatingStrategy.factory();
+	private Factory<RatingGenerator> ratingStrategyFactory = NullRatingGenerator.factory();
 	
 	private Factory<AffinityInitializer> affinityInitializerFactory = RandomAffinityInitializer.factory();
 	private Factory<AffinityUpdater> affinityUpdaterFactory = NullAffinityUpdater.factory();
@@ -109,11 +109,11 @@ public class ModularAgentFactory implements Factory<Agent> {
 		this.ratingInitializerFactory = ratingInitializerFactory;
 	}
 
-	public Factory<RatingGenerator> getRatingStrategyFactory() {
+	public Factory<RatingGenerator> getRatingGeneratorFactory() {
 		return ratingStrategyFactory;
 	}
 
-	public void setRatingStrategyFactory(
+	public void setRatingGeneratorFactory(
 			Factory<RatingGenerator> ratingStrategyFactory) {
 		this.ratingStrategyFactory = ratingStrategyFactory;
 	}
