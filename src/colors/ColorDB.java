@@ -58,7 +58,7 @@ public class ColorDB {
 		Iterator<Integer> result = null;
 		try {
 			Statement s = conn.createStatement();
-			final String sql = "select colors.id as color_id from colors,users where colors.user_id=users.id and users.id=" +  user_id + ";";
+			final String sql = "select colors.id as color_id from colors,users where colors.user_id=users.id and users.id=" +  user_id + " order by random();";
 			final ResultSet rs = s.executeQuery(sql);
 			result = new Iterator<Integer>() {
 				@Override

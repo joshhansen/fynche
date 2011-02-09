@@ -3,9 +3,10 @@ package colors.agents;
 import colors.MultiAgentSystem;
 import colors.affinities.NullAffinityUpdater;
 import colors.affinities.RandomAffinityInitializer;
-import colors.artefacts.NullArtefactInitializer;
 import colors.artefacts.generators.NullArtefactGenerator;
 import colors.artefacts.genplans.NullGenerationPlanner;
+import colors.artefacts.initers.NullArtefactInitializer;
+import colors.artefacts.pubdec.ExuberantPublicationDecider;
 import colors.artefacts.pubdec.NullPublicationDecider;
 import colors.interfaces.AffinityInitializer;
 import colors.interfaces.AffinityUpdater;
@@ -27,7 +28,7 @@ import colors.ratings.NullRatingGenerator;
 public class ModularAgentFactory implements Factory<Agent> {
 	private Factory<GenerationPlanner> generationPlannerFactory = NullGenerationPlanner.factory();
 	
-	private Factory<PublicationDecider> publicationDeciderFactory = NullPublicationDecider.factory();
+	private Factory<PublicationDecider> publicationDeciderFactory = ExuberantPublicationDecider.factory();
 	
 	private Factory<ArtefactInitializer> artefactInitializerFactory = NullArtefactInitializer.factory();
 	private Factory<ArtefactGenerator> artefactGeneratorFactory = NullArtefactGenerator.factory();

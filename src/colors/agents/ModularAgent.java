@@ -1,7 +1,10 @@
 package colors.agents;
 
+import java.util.logging.Logger;
+
 import colors.MultiAgentSystem;
-import colors.artefacts.NullArtefactInitializer;
+import colors.artefacts.initers.NullArtefactInitializer;
+import colors.exceptions.ArtefactGenerationException;
 import colors.interfaces.AffinityInitializer;
 import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
@@ -18,6 +21,7 @@ import colors.ratings.NullRatingInitializer;
 
 public class ModularAgent extends AbstractAgent {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(ModularAgent.class.getName());
 	
 	private final AffinityInitializer affinityIniter;
 	private final AffinityUpdater affinityUpdater;
@@ -70,6 +74,7 @@ public class ModularAgent extends AbstractAgent {
 
 	@Override
 	public void setUp() {
+		logger.fine("Setting up agent " + this);
 		this.publishedArtefacts.add(artIniter.initialArtefacts(this), 0);
 		this.ratings.add(ratingIniter.initialRatings(this), 0);
 		
@@ -87,9 +92,13 @@ public class ModularAgent extends AbstractAgent {
 	
 	public void create() {
 		for(int i = 0; i < genPlan.numArtefactsToGenerate(this); i++) {
-			Artefact a = artGen.generate();
+			try {
+			Artefact a = artGen.generate(this);
 			if(pubDec.shouldPublish(a))
 				publishedArtefacts.add(a, sys.round());
+			} catch(ArtefactGenerationException e) {
+				logger.warning("Error generating artefact: " + e.getMessage());
+			}
 		}
 	}
 	

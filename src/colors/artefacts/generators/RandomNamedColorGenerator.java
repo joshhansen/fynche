@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import colors.artefacts.NamedColor;
+import colors.interfaces.Agent;
 import colors.interfaces.ArtefactGenerator;
 
 public class RandomNamedColorGenerator implements ArtefactGenerator {	
@@ -31,7 +32,7 @@ public class RandomNamedColorGenerator implements ArtefactGenerator {
 
 	private final Random rand = new Random();
 	@Override
-	public NamedColor generate() {
+	public NamedColor generate(Agent agent) {
 		final int r = rand.nextInt(256);
 		final int g = rand.nextInt(256);
 		final int b = rand.nextInt(256);

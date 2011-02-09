@@ -35,8 +35,8 @@ public class SimplerFormatter extends Formatter {
 	        StringBuffer sb = new StringBuffer();
 	        final Level level = record.getLevel();
 			sb.append(tabs(level));
-	        sb.append(level.getLocalizedName());
-	        sb.append(" ");
+//	        sb.append(level.getLocalizedName());
+//	        sb.append(" ");
 	        String message = formatMessage(record);
 	        sb.append(message);
 	        sb.append("\t\t\t(");
@@ -75,6 +75,8 @@ public class SimplerFormatter extends Formatter {
 	    		return 2;
 	    	else if(level.equals(Level.FINEST))
 	    		return 3;
+	    	else if(level.equals(Level.WARNING))
+	    		return 0;
 	    	throw new IllegalArgumentException("Don't recognize level " + level);
 	    }
 	}

@@ -9,10 +9,15 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import colors.agents.ModularAgentFactory;
-import colors.artefacts.RandomAgentArtefactInitializer;
+import colors.artefacts.NamedColor;
+import colors.artefacts.generators.SamplingArtefactGenerator;
+import colors.artefacts.genplans.RandomGenerationPlanner;
+import colors.artefacts.initers.RandomAgentArtefactInitializer;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
+import colors.interfaces.ArtefactGenerator;
 import colors.interfaces.ArtefactInitializer;
+import colors.interfaces.GenerationPlanner;
 import colors.interfaces.PreferenceUpdater;
 import colors.interfaces.RatingGenerator;
 import colors.prefs.IndependentKDEPreferenceUpdater;
@@ -55,25 +60,31 @@ public class MultiAgentSystem implements Serializable {
 	public void run(final int iterations) {
 		logger.info("Going to run for " + iterations + " iterations");
 		for(Agent agent : agents) {
-			logger.fine("Setting up agent " + agent);
 			agent.setUp();
 		}
 		for(int i = 0; i < iterations; i++) {
-			logger.info("Starting round " + i);
+			logger.info("-----Starting round " + i + "-----");
 			for(Agent agent : agents) {
 				agent.roundStart();
 			}
+			
+			logger.info("Beginning artefact generation");
 			for(Agent agent : agents) {
 				agent.create();
 			}
+			logger.info("Beginning rating generation");
 			for(Agent agent : agents) {
 				agent.rate();
 			}
+			
+			logger.info("-----Finishing round " + i + "-----");
 			for(Agent agent : agents) {
 				agent.roundFinish();
 			}
 			round++;
 		}
+		
+		logger.info("Beginning takedown");
 		for(Agent agent : agents) {
 			agent.takeDown();
 		}
@@ -105,7 +116,10 @@ public class MultiAgentSystem implements Serializable {
 		final ModularAgentFactory agentFact = new ModularAgentFactory(sys);
 		agentFact.setPreferenceUpdaterFactory(Util.staticFactory( (PreferenceUpdater) new IndependentKDEPreferenceUpdater()));
 		agentFact.setArtefactInitializerFactory(Util.staticFactory( (ArtefactInitializer) new RandomAgentArtefactInitializer(db, 100, 10)));
+		agentFact.setArtefactGeneratorFactory(Util.staticFactory( (ArtefactGenerator) new SamplingArtefactGenerator<NamedColor>()));
+		agentFact.setGenerationPlannerFactory(Util.staticFactory( (GenerationPlanner) new RandomGenerationPlanner(10)));
 		agentFact.setRatingGeneratorFactory(Util.staticFactory( (RatingGenerator) new EgocentricRatingGenerator()));
+		
 		for(int i = 0; i < agentCount; i++) {
 			sys.addAgent(agentFact.instantiate());
 		}
