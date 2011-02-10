@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import colors.affinities.AverageRatingAffinityUpdater;
 import colors.agents.ModularAgentFactory;
+import colors.agents.RandomAgent;
 import colors.artefacts.NamedColor;
 import colors.artefacts.generators.CopycatArtefactGenerator;
 import colors.artefacts.generators.GroupedArtefactGenerator;
@@ -113,10 +114,10 @@ public class MultiAgentSystem implements Serializable {
 		final ColorDB db = new ColorDB("/home/jjfresh/Courses/cs673/colors2.db");
 		
 		final MultiAgentSystem sys = new MultiAgentSystem();
-		final int agentCount = 10;
+		final int agentCount = 4;
 		final int iterations = 10;
 		final int topAgentsToPickFrom = 100;
-		final int maxInitialArtefactsPerAgent = 500;
+		final int maxInitialArtefactsPerAgent = 40;
 		final boolean orderArtefactsRandomly = true;
 		
 		final ModularAgentFactory agentFact = new ModularAgentFactory(sys);
@@ -131,9 +132,10 @@ public class MultiAgentSystem implements Serializable {
 		gag.addGenerator(new CopycatArtefactGenerator(), 0.1);
 		agentFact.setArtefactGeneratorFactory(Util.staticFactory( (ArtefactGenerator) gag));
 		
-		for(int i = 0; i < agentCount; i++) {
+		for(int i = 0; i < agentCount-1; i++) {
 			sys.addAgent(agentFact.instantiate());
 		}
+		sys.addAgent(new RandomAgent(sys));
 		
 		sys.run(iterations);
 		sys.dumpResult();

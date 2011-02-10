@@ -17,14 +17,20 @@ public abstract class AbstractRatingGenerator implements RatingGenerator {
 		for(Agent other : rater.system().agents()) {
 			if(other != rater) {
 				for(Artefact artefact : other.publishedArtefacts(currentRound - 1)) {
-					Rating rating = rate(rater, other, artefact);
-					if(rating != null) {
-//						logger.finer("Agent " + rater + " rated " + artefact + " as " + rating.rating());
-						ratings.add(rating, currentRound);
+					if(shouldRate(rater, other, artefact)) {
+						Rating rating = rate(rater, other, artefact);
+						if(rating != null) {
+	//						logger.finer("Agent " + rater + " rated " + artefact + " as " + rating.rating());
+							ratings.add(rating, currentRound);
+						}
 					}
 				}
 			}
 		}
+	}
+	
+	protected boolean shouldRate(final Agent rater, final Agent other, final Artefact artefact) {
+		return true;
 	}
 	
 	/**

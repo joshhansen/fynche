@@ -15,16 +15,15 @@ import colors.util.Counter;
 import colors.util.SampleableKernelEstimator;
 
 public class IndependentKDEPreferenceUpdater implements PreferenceUpdater {
-	private static Pattern tokenRegex = Pattern.compile("(\\p{Alpha}+)|([0-9.]+)|(\\p{Punct}+)");
+	private static Pattern tokenRegex = Pattern.compile("(\\p{XDigit}\\p{XDigit}\\p{XDigit}\\p{XDigit}\\p{XDigit}\\p{XDigit})|(\\p{Alpha}+)|([0-9.]+)|(\\p{Punct}+)");
 	
-	private static final String STOP_TOKEN = "<<<STOP>>>";
 	private static List<String> tokenize(final String s) {
 		List<String> parts = new ArrayList<String>();
 		final Matcher m = tokenRegex.matcher(s);
 		while(m.find()) {
 			parts.add(m.group());
 		}
-		parts.add(STOP_TOKEN);
+//		System.out.println(s + " => " + parts);
 		return parts;
 	}
 	

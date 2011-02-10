@@ -12,6 +12,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 public class Graph {
+	private static class Spell {
+		
+	}
+	
 	/** This helps us maintain a global list of attributes based on which ones are set at the node and edge level */
 	private static class SetUpdatingMap<K,V> extends HashMap<K,V> {
 		private final Set<K> set;

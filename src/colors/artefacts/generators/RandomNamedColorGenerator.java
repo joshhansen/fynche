@@ -37,7 +37,7 @@ public class RandomNamedColorGenerator implements ArtefactGenerator {
 		final int g = rand.nextInt(256);
 		final int b = rand.nextInt(256);
 		final Color c = new Color(r, g, b);
-		final String word = dict.get(rand.nextInt(dict.size()));
+		final String word = dict.get(rand.nextInt(dict.size())).replace("'s", "");
 		return new NamedColor(c, word);
 	}
 }
