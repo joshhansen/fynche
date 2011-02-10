@@ -12,5 +12,5 @@ public interface RatingGenerator {
 	 * manipulable by code owned by the agent itself. Thus <code>PartitionedSet<Rating,Integer> ratings</code>
 	 * is kept protected and must be handed to this <code>RatingGenerator</code> explicitly.
 	 */
-	public void rate(final Agent rater, final PartitionedSet<Rating,Integer> ratings);
+	public void generate(final Agent rater, final PartitionedSet<Rating,Integer> ratings);
 }

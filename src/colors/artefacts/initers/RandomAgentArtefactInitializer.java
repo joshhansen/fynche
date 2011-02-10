@@ -22,9 +22,11 @@ public class RandomAgentArtefactInitializer implements ArtefactInitializer {
 	private final List<Integer> topNids;
 	private static final Random rand = new Random();
 	private final int maxArtefacts;
-	public RandomAgentArtefactInitializer(final ColorDB db, final int topN, final int maxArtefacts) {
+	private final boolean orderArtefactsRandomly;
+	public RandomAgentArtefactInitializer(final ColorDB db, final int topN, final int maxArtefacts, final boolean orderArtefactsRandomly) {
 		this.db = db;
 		this.maxArtefacts = maxArtefacts;
+		this.orderArtefactsRandomly = orderArtefactsRandomly;
 		
 		List<Integer> ids = new ArrayList<Integer>();
 		try {
@@ -46,7 +48,7 @@ public class RandomAgentArtefactInitializer implements ArtefactInitializer {
 	public Set<Artefact> initialArtefacts(Agent agent) {
 		logger.finer("Generating initial artefacts for agent " + agent);
 		Integer id = topNids.get(rand.nextInt(topNids.size()));
-		Iterator<Integer> colorIDs = db.getUserColorIDs(id);
+		Iterator<Integer> colorIDs = db.getUserColorIDs(id, orderArtefactsRandomly);
 		
 		Set<Artefact> arts = new HashSet<Artefact>();
 		int i = 0;

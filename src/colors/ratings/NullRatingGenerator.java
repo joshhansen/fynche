@@ -16,7 +16,7 @@ public class NullRatingGenerator implements RatingGenerator {
 		};
 	}
 	@Override
-	public void rate(Agent rater, final PartitionedSet<Rating,Integer> ratings) {
+	public void generate(Agent rater, final PartitionedSet<Rating,Integer> ratings) {
 		//Do nothing
 	}
 }

@@ -7,7 +7,6 @@ import colors.artefacts.generators.NullArtefactGenerator;
 import colors.artefacts.genplans.NullGenerationPlanner;
 import colors.artefacts.initers.NullArtefactInitializer;
 import colors.artefacts.pubdec.ExuberantPublicationDecider;
-import colors.artefacts.pubdec.NullPublicationDecider;
 import colors.interfaces.AffinityInitializer;
 import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
@@ -18,12 +17,12 @@ import colors.interfaces.GenerationPlanner;
 import colors.interfaces.PreferenceInitializer;
 import colors.interfaces.PreferenceUpdater;
 import colors.interfaces.PublicationDecider;
-import colors.interfaces.RatingInitializer;
 import colors.interfaces.RatingGenerator;
+import colors.interfaces.RatingInitializer;
 import colors.prefs.NullPreferenceInitializer;
 import colors.prefs.NullPreferenceUpdater;
-import colors.ratings.NullRatingInitializer;
 import colors.ratings.NullRatingGenerator;
+import colors.ratings.NullRatingInitializer;
 
 public class ModularAgentFactory implements Factory<Agent> {
 	private Factory<GenerationPlanner> generationPlannerFactory = NullGenerationPlanner.factory();

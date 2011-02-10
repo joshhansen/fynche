@@ -1,8 +1,8 @@
 package colors.interfaces;
 
-import java.util.Map;
+import colors.util.Counter;
 
 
 public interface AffinityInitializer {
-	public Map<Agent,Double> initialAffinities(final Agent agent);
+	public Counter<Agent> initialAffinities(final Agent agent);
 }

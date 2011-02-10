@@ -15,14 +15,16 @@ import colors.util.Counter;
 import colors.util.SampleableKernelEstimator;
 
 public class IndependentKDEPreferenceUpdater implements PreferenceUpdater {
-	private static Pattern tokenRegex = Pattern.compile("[a-z]+");
+	private static Pattern tokenRegex = Pattern.compile("(\\p{Alpha}+)|([0-9.]+)|(\\p{Punct}+)");
 	
+	private static final String STOP_TOKEN = "<<<STOP>>>";
 	private static List<String> tokenize(final String s) {
 		List<String> parts = new ArrayList<String>();
-		final Matcher m = tokenRegex.matcher(s.toLowerCase());
+		final Matcher m = tokenRegex.matcher(s);
 		while(m.find()) {
 			parts.add(m.group());
 		}
+		parts.add(STOP_TOKEN);
 		return parts;
 	}
 	
@@ -31,28 +33,30 @@ public class IndependentKDEPreferenceUpdater implements PreferenceUpdater {
 		private final SampleableKernelEstimator g;
 		private final SampleableKernelEstimator b;
 		private final Counter<String> words;
+		private final Counter<Integer> tokenCount;
 
 		private KDEColorModel(SampleableKernelEstimator r, SampleableKernelEstimator g,
-				SampleableKernelEstimator b, Counter<String> words) {
-			this.b = b;
+				SampleableKernelEstimator b, Counter<String> words, Counter<Integer> tokenCount) {
 			this.r = r;
-			this.words = words;
 			this.g = g;
+			this.b = b;
+			this.words = words;
+			this.tokenCount = tokenCount;
 		}
 
 		@Override
 		public double preference(Artefact artefact) {
 			if(artefact instanceof NamedColor) {
 				NamedColor nc = (NamedColor) artefact;
-				final double prob_r = r.getProbability(nc.getColor().getRed());
-				final double prob_g = g.getProbability(nc.getColor().getGreen());
-				final double prob_b = b.getProbability(nc.getColor().getBlue());
+				final double log_prob_r = r.getLogProbability(nc.getColor().getRed());
+				final double log_prob_g = g.getLogProbability(nc.getColor().getGreen());
+				final double log_prob_b = b.getLogProbability(nc.getColor().getBlue());
 				
-				double prob_w = 1.0;
+				double log_prob_w = 0;
 				for(final String w_n : tokenize(nc.getName())) {
-					prob_w *= words.getCount(w_n);
+					log_prob_w += words.getLogCount(w_n);
 				}
-				return prob_r*prob_g*prob_b*prob_w;
+				return Math.exp(log_prob_r+log_prob_g+log_prob_b+log_prob_w);
 			} else throw new IllegalArgumentException();
 		}
 
@@ -61,8 +65,14 @@ public class IndependentKDEPreferenceUpdater implements PreferenceUpdater {
 			final int r_ = r.sample(0, 255, 1).intValue();
 			final int g_ = g.sample(0, 255, 1).intValue();
 			final int b_ = b.sample(0, 255, 1).intValue();
-			final String word = words.sample();
-			return new NamedColor(r_, g_, b_, word);
+			StringBuilder name = new StringBuilder();
+			
+			final int length = tokenCount.sample();
+			for(int i = 0; i < length; i++) {
+				name.append(words.sample());
+				name.append(' ');
+			}
+			return new NamedColor(r_, g_, b_, name.toString().trim());
 		}
 	}
 
@@ -76,6 +86,7 @@ public class IndependentKDEPreferenceUpdater implements PreferenceUpdater {
 		final SampleableKernelEstimator g = new SampleableKernelEstimator(1);
 		final SampleableKernelEstimator b = new SampleableKernelEstimator(1);
 		final Counter<String> words = new Counter<String>();
+		final Counter<Integer> tokenCounts = new Counter<Integer>();
 		for(Artefact a : agentB.publishedArtefacts()) {
 			if(a instanceof NamedColor) {
 				NamedColor nc = (NamedColor) a;
@@ -85,12 +96,14 @@ public class IndependentKDEPreferenceUpdater implements PreferenceUpdater {
 				b.addValue(color.getBlue(), 1);
 				
 				final String name = nc.getName();
-				words.incrementAll(tokenize(name));
+				final List<String> tokens = tokenize(name);
+				words.incrementAll(tokens);
+				tokenCounts.increment(tokens.size());
 			}
 		}
 		words.normalize();
 		
-		final KDEColorModel model = new KDEColorModel(r, g, b, words);
+		final KDEColorModel model = new KDEColorModel(r, g, b, words, tokenCounts);
 //		System.out.println("sample: " + model.sample());
 		return model;
 	}

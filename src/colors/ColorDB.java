@@ -1,5 +1,6 @@
 package colors;
 
+import java.awt.Color;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -54,12 +55,20 @@ public class ColorDB {
 	}
 	
 	public Iterator<Integer> getUserColorIDs(final int user_id) {
+		return getUserColorIDs(user_id, false);
+	}
+	
+	public Iterator<Integer> getUserColorIDs(final int user_id, final boolean randomize) {
 //			select hex from colors,users where colors.user_id=users.id and users.username="Nice Autumn";
 		Iterator<Integer> result = null;
 		try {
 			Statement s = conn.createStatement();
-			final String sql = "select colors.id as color_id from colors,users where colors.user_id=users.id and users.id=" +  user_id + " order by random();";
-			final ResultSet rs = s.executeQuery(sql);
+			StringBuilder sql = new StringBuilder();
+			sql.append("select colors.id as color_id from colors,users where colors.user_id=users.id and users.id=");
+			sql.append(user_id);
+			if(randomize) sql.append(" order by random()");
+			sql.append(";");
+			final ResultSet rs = s.executeQuery(sql.toString());
 			result = new Iterator<Integer>() {
 				@Override
 				public boolean hasNext() {
@@ -103,7 +112,7 @@ public class ColorDB {
 				final int g = rs.getInt("g");
 				final int b = rs.getInt("b");
 				final String name = rs.getString("title");
-				color = new NamedColor(r, g, b, name);
+				color = new NamedColor(new Color(r, g, b), name);
 			} else throw new IllegalArgumentException();
 		} catch(SQLException e) {
 			e.printStackTrace();

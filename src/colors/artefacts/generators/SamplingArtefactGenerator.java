@@ -9,19 +9,16 @@ import colors.interfaces.ArtefactGenerator;
 import colors.interfaces.PreferenceModel;
 import colors.prefs.IndependentKDEPreferenceUpdater.Sampleable;
 
-public class SamplingArtefactGenerator<A extends Artefact> implements ArtefactGenerator {
+public class SamplingArtefactGenerator implements ArtefactGenerator {
 	private static final Logger logger = Logger.getLogger(SamplingArtefactGenerator.class.getName());
 	@Override
-	public A generate(Agent agent) throws ArtefactGenerationException {
+	public Artefact generate(Agent agent) throws ArtefactGenerationException {
 		PreferenceModel prefs = agent.preferenceModels().get(agent);
 		if(prefs instanceof Sampleable) {
-			Sampleable<A> sampleMe = (Sampleable<A>) prefs;
-			A artefact = sampleMe.sample();
-			logger.finer("Agent " + agent + " generated artefact " + artefact);
-			return artefact;
+			Sampleable<?> sampleMe = (Sampleable<?>) prefs;
+			return (Artefact) sampleMe.sample();
 		} else {
-			logger.warning("Didn't find Sampleable preference model; no artefact generated");
-			throw new ArtefactGenerationException("Didn't find Sampleable preference model; no artefact generated");
+			throw new ArtefactGenerationException("Didn't find Sampleable preference model");
 		}
 	}
 

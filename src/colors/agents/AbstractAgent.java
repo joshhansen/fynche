@@ -9,13 +9,14 @@ import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.PreferenceModel;
 import colors.interfaces.Rating;
+import colors.util.Counter;
 import colors.util.PartitionedSet;
 
 public abstract class AbstractAgent implements Agent {
 	private static final long serialVersionUID = 1L;
 	
 	protected final MultiAgentSystem sys;
-	protected Map<Agent,Double> affinities = new HashMap<Agent,Double>();
+	protected Counter<Agent> affinities = new Counter<Agent>();
 	protected Map<Agent,PreferenceModel> preferenceModels = new HashMap<Agent,PreferenceModel>();
 	protected final PartitionedSet<Artefact,Integer> publishedArtefacts = new PartitionedSet<Artefact,Integer>();
 	protected final PartitionedSet<Rating,Integer> ratings = new PartitionedSet<Rating,Integer>();
@@ -49,7 +50,7 @@ public abstract class AbstractAgent implements Agent {
 	}
 	
 	@Override
-	public Map<Agent, Double> affinities() {
+	public Counter<Agent> affinities() {
 		return affinities;
 	}
 

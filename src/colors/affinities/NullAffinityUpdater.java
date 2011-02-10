@@ -1,10 +1,9 @@
 package colors.affinities;
 
-import java.util.Map;
-
 import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
 import colors.interfaces.Factory;
+import colors.util.Counter;
 
 public class NullAffinityUpdater implements AffinityUpdater {
 	public static Factory<AffinityUpdater> factory() {
@@ -16,7 +15,7 @@ public class NullAffinityUpdater implements AffinityUpdater {
 		};
 	}
 	@Override
-	public Map<Agent, Double> newAffinities(Agent agent) {
+	public Counter<Agent> newAffinities(Agent agent) {
 		return agent.affinities();
 	}
 

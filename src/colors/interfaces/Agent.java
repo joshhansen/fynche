@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import colors.MultiAgentSystem;
+import colors.util.Counter;
 
 public interface Agent extends Serializable {
 	/**
@@ -53,7 +54,7 @@ public interface Agent extends Serializable {
 	
 	public Set<Rating> ratings(final int roundNum);
 	
-	public Map<Agent,Double> affinities();
+	public Counter<Agent> affinities();
 	
 	public Map<Agent,PreferenceModel> preferenceModels();
 }

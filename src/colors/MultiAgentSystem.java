@@ -4,15 +4,17 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
+import colors.affinities.AverageRatingAffinityUpdater;
 import colors.agents.ModularAgentFactory;
 import colors.artefacts.NamedColor;
+import colors.artefacts.generators.CopycatArtefactGenerator;
+import colors.artefacts.generators.GroupedArtefactGenerator;
 import colors.artefacts.generators.SamplingArtefactGenerator;
 import colors.artefacts.genplans.RandomGenerationPlanner;
 import colors.artefacts.initers.RandomAgentArtefactInitializer;
+import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.ArtefactGenerator;
@@ -59,6 +61,7 @@ public class MultiAgentSystem implements Serializable {
 	 */
 	public void run(final int iterations) {
 		logger.info("Going to run for " + iterations + " iterations");
+		logger.info("Setup");
 		for(Agent agent : agents) {
 			agent.setUp();
 		}
@@ -107,24 +110,32 @@ public class MultiAgentSystem implements Serializable {
 	
 	public static void main(String[] args) {
 		Util.initLogging();
-//		SimpleFormatter sf;
 		final ColorDB db = new ColorDB("/home/jjfresh/Courses/cs673/colors2.db");
 		
 		final MultiAgentSystem sys = new MultiAgentSystem();
 		final int agentCount = 10;
+		final int iterations = 10;
+		final int topAgentsToPickFrom = 100;
+		final int maxInitialArtefactsPerAgent = 500;
+		final boolean orderArtefactsRandomly = true;
 		
 		final ModularAgentFactory agentFact = new ModularAgentFactory(sys);
 		agentFact.setPreferenceUpdaterFactory(Util.staticFactory( (PreferenceUpdater) new IndependentKDEPreferenceUpdater()));
-		agentFact.setArtefactInitializerFactory(Util.staticFactory( (ArtefactInitializer) new RandomAgentArtefactInitializer(db, 100, 10)));
-		agentFact.setArtefactGeneratorFactory(Util.staticFactory( (ArtefactGenerator) new SamplingArtefactGenerator<NamedColor>()));
+		agentFact.setArtefactInitializerFactory(Util.staticFactory( (ArtefactInitializer) new RandomAgentArtefactInitializer(db, topAgentsToPickFrom, maxInitialArtefactsPerAgent, orderArtefactsRandomly)));
 		agentFact.setGenerationPlannerFactory(Util.staticFactory( (GenerationPlanner) new RandomGenerationPlanner(10)));
 		agentFact.setRatingGeneratorFactory(Util.staticFactory( (RatingGenerator) new EgocentricRatingGenerator()));
+		agentFact.setAffinityUpdaterFactory(Util.staticFactory( (AffinityUpdater) new AverageRatingAffinityUpdater()));
+		
+		final GroupedArtefactGenerator gag = new GroupedArtefactGenerator();
+		gag.addGenerator(new SamplingArtefactGenerator(), 0.9);
+		gag.addGenerator(new CopycatArtefactGenerator(), 0.1);
+		agentFact.setArtefactGeneratorFactory(Util.staticFactory( (ArtefactGenerator) gag));
 		
 		for(int i = 0; i < agentCount; i++) {
 			sys.addAgent(agentFact.instantiate());
 		}
 		
-		sys.run(10);
+		sys.run(iterations);
 		sys.dumpResult();
 	}
 }

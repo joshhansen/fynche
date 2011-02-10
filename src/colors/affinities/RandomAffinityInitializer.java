@@ -1,12 +1,11 @@
 package colors.affinities;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 import colors.interfaces.AffinityInitializer;
 import colors.interfaces.Agent;
 import colors.interfaces.Factory;
+import colors.util.Counter;
 
 public class RandomAffinityInitializer implements AffinityInitializer {
 	public static Factory<AffinityInitializer> factory() {
@@ -19,13 +18,14 @@ public class RandomAffinityInitializer implements AffinityInitializer {
 	}
 	private final Random rand = new Random();
 	@Override
-	public Map<Agent, Double> initialAffinities(Agent agent) {
-		Map<Agent,Double> affins = new HashMap<Agent,Double>();
+	public Counter<Agent> initialAffinities(Agent agent) {
+		Counter<Agent> affins = new Counter<Agent>();
 		for(Agent otherAgent : agent.system().agents()) {
 			if(otherAgent != agent) {
-				affins.put(otherAgent, rand.nextDouble());
+				affins.setCount(otherAgent, rand.nextDouble());
 			}
 		}
+		affins.normalize();
 		return affins;
 	}
 }

@@ -28,7 +28,7 @@ public class ModularAgent extends AbstractAgent {
 	private final GenerationPlanner genPlan;
 	private final PublicationDecider pubDec;
 	private final ArtefactGenerator artGen;
-	private final RatingGenerator ratingStrategy;
+	private final RatingGenerator ratingGenerator;
 	private final PreferenceInitializer prefIniter;
 	private final PreferenceUpdater prefUpdater;
 	private final ArtefactInitializer artIniter;
@@ -65,7 +65,7 @@ public class ModularAgent extends AbstractAgent {
 		this.pubDec = pubDec;
 		this.artGen = artGen;
 		this.affinityUpdater = affinityUpdater;
-		this.ratingStrategy = ratingStrategy;
+		this.ratingGenerator = ratingStrategy;
 		this.prefIniter = prefIniter;
 		this.prefUpdater = prefUpdater;
 		this.ratingIniter = ratingIniter;
@@ -93,9 +93,17 @@ public class ModularAgent extends AbstractAgent {
 	public void create() {
 		for(int i = 0; i < genPlan.numArtefactsToGenerate(this); i++) {
 			try {
-			Artefact a = artGen.generate(this);
-			if(pubDec.shouldPublish(a))
-				publishedArtefacts.add(a, sys.round());
+				Artefact a = artGen.generate(this);
+				final StringBuilder msg = new StringBuilder();
+				msg.append("Agent ");
+				msg.append(this.toString());
+				msg.append(" generated artefact ");
+				msg.append(a.toString());
+				if(pubDec.shouldPublish(a)) {
+					publishedArtefacts.add(a, sys.round());
+					msg.append(" (PUBLISHED)");
+				}
+				logger.fine(msg.toString());
 			} catch(ArtefactGenerationException e) {
 				logger.warning("Error generating artefact: " + e.getMessage());
 			}
@@ -104,12 +112,14 @@ public class ModularAgent extends AbstractAgent {
 	
 	@Override
 	public void rate() {
-		ratingStrategy.rate(this, ratings);
+		ratingGenerator.generate(this, ratings);
 	}
 	
 	@Override
 	public void roundFinish() {
 		affinities = affinityUpdater.newAffinities(this);
+		logger.fine("affinities(" + this + ") => " + affinities);
+		
 		for(Agent other : sys.agents()) {
 			preferenceModels.put(other, prefUpdater.newPreferences(this, other));
 		}

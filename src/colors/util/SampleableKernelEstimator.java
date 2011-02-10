@@ -35,4 +35,11 @@ public class SampleableKernelEstimator extends KernelEstimator {
 		}
 		return null;
 	}
+	
+	public double getLogProbability(double data) {
+		final double prob = super.getProbability(data);
+		if(prob == 0) return 0.0;
+		return Math.log(prob);
+	}
+
 }

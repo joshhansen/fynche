@@ -11,7 +11,7 @@ import colors.util.PartitionedSet;
 public abstract class AbstractRatingGenerator implements RatingGenerator {
 	private final Logger logger = Logger.getLogger(AbstractRatingGenerator.class.getName());
 	@Override
-	public void rate(Agent rater, final PartitionedSet<Rating,Integer> ratings) {
+	public void generate(Agent rater, final PartitionedSet<Rating,Integer> ratings) {
 		logger.fine("Generating ratings for agent " + rater);
 		final int currentRound = rater.system().round();
 		for(Agent other : rater.system().agents()) {
@@ -19,6 +19,7 @@ public abstract class AbstractRatingGenerator implements RatingGenerator {
 				for(Artefact artefact : other.publishedArtefacts(currentRound - 1)) {
 					Rating rating = rate(rater, other, artefact);
 					if(rating != null) {
+//						logger.finer("Agent " + rater + " rated " + artefact + " as " + rating.rating());
 						ratings.add(rating, currentRound);
 					}
 				}

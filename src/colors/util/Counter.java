@@ -47,29 +47,66 @@ public class Counter<T> {
 		return sum;
 	}
 	
-	public void normalize() {
+	public Counter<T> normalize() {
 		final double denom = totalCount();
 		for(T item : counts.keySet()) {
 			counts.put(item, counts.get(item)/denom);
 		}
+		return this;
 	}
 	
 	/**
 	 * This is O(n). There's got to be a faster way.
-	 * NOTE: Assumes the counter has already been normalized
 	 */
 	public T sample() {
+		final double total = totalCount();
 		final double position = rand.nextDouble();
-//		Entry<T,Double>[] entries = (Entry<T, Double>[]) counts.entrySet().toArray();
 		double sum = 0.0;
-//		for(int i = 0; i < entries.length; i++) {
-//			Entry<T,Double> entry = entries[i];
 		for(Entry<T,Double> entry : counts.entrySet()) {
-			final double thisCount = entry.getValue().doubleValue();
+			final double thisCount = entry.getValue().doubleValue() / total;
 			if(sum >= position || sum+thisCount>=0.999999999)
 				return entry.getKey();
 			sum += thisCount;
 		}
 		throw new IllegalArgumentException("Not really an illegal argument, but something went wrong!");
+	}
+
+	public double getLogCount(T item) {
+		final double count = getCount(item);
+		if(count == 0.0) return 0.0;
+		return Math.log(count);
+	}
+
+	public void setCount(T item, double weight) {
+		counts.put(item, weight);
+	}
+	
+	public Double remove(T item) {
+		return counts.remove(item);
+	}
+
+	public Set<T> keySet() {
+		return counts.keySet();
+	}
+
+	public boolean isEmpty() {
+		return counts.isEmpty();
+	}
+
+	public Set<Entry<T, Double>> entrySet() {
+		return counts.entrySet();
+	}
+	
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		
+		for(Entry<T,Double> entry : entrySet()) {
+			sb.append(entry.getKey().toString());
+			sb.append(":");
+			sb.append(entry.getValue());
+			sb.append(' ');
+		}
+		
+		return sb.toString().trim();
 	}
 }
