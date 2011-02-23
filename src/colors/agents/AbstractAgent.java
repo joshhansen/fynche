@@ -16,13 +16,15 @@ public abstract class AbstractAgent implements Agent {
 	private static final long serialVersionUID = 1L;
 	
 	protected final MultiAgentSystem sys;
+	protected final String id;
 	protected Counter<Agent> affinities = new Counter<Agent>();
 	protected Map<Agent,PreferenceModel> preferenceModels = new HashMap<Agent,PreferenceModel>();
 	protected final PartitionedSet<Artefact,Integer> publishedArtefacts = new PartitionedSet<Artefact,Integer>();
 	protected final PartitionedSet<Rating,Integer> ratings = new PartitionedSet<Rating,Integer>();
 
-	public AbstractAgent(final MultiAgentSystem sys) {
+	public AbstractAgent(final MultiAgentSystem sys, final String id) {
 		this.sys = sys;
+		this.id = id;
 	}
 	
 	public MultiAgentSystem system() {
@@ -58,7 +60,9 @@ public abstract class AbstractAgent implements Agent {
 		return preferenceModels;
 	}
 	
-	
+	public String toString() {
+		return id;
+	}
 	
 //	public PreferenceModel preferences() {
 //		return prefs;

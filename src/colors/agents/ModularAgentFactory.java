@@ -25,6 +25,7 @@ import colors.ratings.NullRatingGenerator;
 import colors.ratings.NullRatingInitializer;
 
 public class ModularAgentFactory implements Factory<Agent> {
+	private int nextAgentNum = 0;
 	private Factory<GenerationPlanner> generationPlannerFactory = NullGenerationPlanner.factory();
 	
 	private Factory<PublicationDecider> publicationDeciderFactory = ExuberantPublicationDecider.factory();
@@ -50,8 +51,9 @@ public class ModularAgentFactory implements Factory<Agent> {
  
 	@Override
 	public ModularAgent instantiate() {
+		final String id = "agent" + nextAgentNum++;
 		return new ModularAgent(
-			system,
+			system,id,
 			generationPlannerFactory.instantiate(),
 			artefactGeneratorFactory.instantiate(),
 			publicationDeciderFactory.instantiate(),

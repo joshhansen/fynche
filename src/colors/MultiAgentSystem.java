@@ -25,6 +25,7 @@ import colors.interfaces.PreferenceUpdater;
 import colors.interfaces.RatingGenerator;
 import colors.prefs.IndependentKDEPreferenceUpdater;
 import colors.ratings.EgocentricRatingGenerator;
+import colors.util.Counter;
 import colors.util.Util;
 
 public class MultiAgentSystem implements Serializable {
@@ -85,6 +86,7 @@ public class MultiAgentSystem implements Serializable {
 			for(Agent agent : agents) {
 				agent.roundFinish();
 			}
+			dumpAffinities();
 			round++;
 		}
 		
@@ -96,6 +98,27 @@ public class MultiAgentSystem implements Serializable {
 	
 	public void step() {
 		run(1);
+	}
+	
+	public void dumpAffinities() {
+		final Agent[] agentsArr = agents.toArray(new Agent[0]);
+		System.out.print('\t');
+		for(Agent agent : agentsArr) {
+			System.out.print(agent);
+			System.out.print('\t');
+		}
+		System.out.println();
+		
+		for(Agent agentA : agentsArr) {
+			final Counter<Agent> affins = agentA.affinities();
+			System.out.print(agentA);
+			System.out.print('\t');
+			for(Agent agentB : agentsArr) {
+				System.out.print(affins.getCount(agentB));
+				System.out.print('\t');
+			}
+			System.out.println();
+		}
 	}
 	
 	public void dumpResult() {
@@ -135,7 +158,7 @@ public class MultiAgentSystem implements Serializable {
 		for(int i = 0; i < agentCount-1; i++) {
 			sys.addAgent(agentFact.instantiate());
 		}
-		sys.addAgent(new RandomAgent(sys));
+		sys.addAgent(new RandomAgent(sys,"random"));
 		
 		sys.run(iterations);
 		sys.dumpResult();

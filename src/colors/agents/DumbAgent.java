@@ -12,8 +12,8 @@ import colors.ratings.NullRatingGenerator;
 
 public class DumbAgent extends ModularAgent {
 	private static final long serialVersionUID = 1L;
-	public DumbAgent(MultiAgentSystem sys) {
-		super(sys,
+	public DumbAgent(MultiAgentSystem sys, final String id) {
+		super(sys,id,
 				new FixedGenerationPlanner(1),
 				new RandomNamedColorGenerator(),
 				new ExuberantPublicationDecider(),

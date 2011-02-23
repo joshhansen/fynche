@@ -12,8 +12,8 @@ import colors.ratings.RandomRatingGenerator;
 
 public class RandomAgent extends ModularAgent {
 	private static final long serialVersionUID = 1L;
-	public RandomAgent(MultiAgentSystem sys) {
-		super(sys,
+	public RandomAgent(MultiAgentSystem sys, final String id) {
+		super(sys,id,
 				new RandomGenerationPlanner(20),
 				new RandomNamedColorGenerator(),
 				new RandomPublicationDecider(0.5),

@@ -35,6 +35,7 @@ public class ModularAgent extends AbstractAgent {
 	private final RatingInitializer ratingIniter;
 	public ModularAgent(
 			MultiAgentSystem sys,
+			final String id,
 			GenerationPlanner genPlan,
 			ArtefactGenerator artGen,
 			PublicationDecider pubDec, 
@@ -43,12 +44,13 @@ public class ModularAgent extends AbstractAgent {
 			AffinityUpdater affinityUpdater, 
 			PreferenceInitializer prefIniter,
 			PreferenceUpdater prefUpdater) {
-		this(sys, genPlan, artGen, pubDec, ratingStrategy, affinityIniter, affinityUpdater, prefIniter, prefUpdater,
+		this(sys, id, genPlan, artGen, pubDec, ratingStrategy, affinityIniter, affinityUpdater, prefIniter, prefUpdater,
 			new NullArtefactInitializer(), new NullRatingInitializer());
 	}
 	
 	public ModularAgent(
 			MultiAgentSystem sys,
+			final String id,
 			GenerationPlanner genPlan,
 			ArtefactGenerator artGen,
 			PublicationDecider pubDec, 
@@ -59,7 +61,7 @@ public class ModularAgent extends AbstractAgent {
 			PreferenceUpdater prefUpdater,
 			ArtefactInitializer artIniter,
 			RatingInitializer ratingIniter) {
-		super(sys);
+		super(sys, id);
 		this.affinityIniter = affinityIniter;
 		this.genPlan = genPlan;
 		this.pubDec = pubDec;
