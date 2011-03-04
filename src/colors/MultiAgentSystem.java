@@ -1,7 +1,9 @@
 package colors;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -26,6 +28,9 @@ import colors.interfaces.RatingGenerator;
 import colors.prefs.IndependentKDEPreferenceUpdater;
 import colors.ratings.EgocentricRatingGenerator;
 import colors.util.Counter;
+import colors.util.DynamicGraph;
+import colors.util.DynamicGraph.Directionality;
+import colors.util.DynamicGraph.Edge;
 import colors.util.Util;
 
 public class MultiAgentSystem implements Serializable {
@@ -41,6 +46,7 @@ public class MultiAgentSystem implements Serializable {
 	
 	
 	private int round = 0;
+//	private final DynamicGraph graph = new DynamicGraph(Directionality.UNDIRECTED);
 	private MultiAgentSystem() {
 	}
 	
@@ -87,6 +93,7 @@ public class MultiAgentSystem implements Serializable {
 				agent.roundFinish();
 			}
 			dumpAffinities();
+//			updateGraphAffinities();
 			round++;
 		}
 		
@@ -100,12 +107,51 @@ public class MultiAgentSystem implements Serializable {
 		run(1);
 	}
 	
+//	public void initGraph() {
+//		for(Agent agent : agents) {
+//			graph.addNode(agent.toString());
+//		}
+//		
+////		for(Agent agent : agents) {
+////			for(Agent other : agents) {
+////				if(agent.toString().compareTo(other.toString()) > 0) {
+////					graph.addEdge(agent.toString(), other.toString());
+////				}
+////			}
+////		}
+//	}
+//	
+//	public void updateGraphAffinities() {
+//		for(Agent agent1 : agents) {
+//			for(Agent agent2 : agents) {
+//				if(agent1.toString().compareTo(agent2.toString()) > 0) {
+//					final double affin1 = agent1.affinities().getCount(agent2);
+//					final double affin2 = agent2.affinities().getCount(agent1);
+//					final double affin = 100*(affin1+affin2)/2.0;
+//					final Edge e = graph.addEdge(agent1.toString(), agent2.toString(), agent1.toString()+"__"+agent2.toString()+"__"+round);
+//					e.enter(round);
+//					e.exit(round+1);
+//					e.setStaticAttribute("weight", String.valueOf(affin));
+////					graph.getEdge(agent1.toString(), agent2.toString()).enterDynamicAttributeValue("weight", String.valueOf(affin), round);
+////					graph.getEdge(agent1.toString(), agent2.toString()).exitDynamicAttributeValue("weight", String.valueOf(affin), round+1);
+//				}
+//			}
+//		}
+//	}
+	
 	public void dumpAffinities() {
 		final Agent[] agentsArr = agents.toArray(new Agent[0]);
+		Arrays.sort(agentsArr, new Comparator<Agent>(){
+			@Override
+			public int compare(Agent o1, Agent o2) {
+				return o1.toString().compareTo(o2.toString());
+			}
+		});
 		System.out.print('\t');
-		for(Agent agent : agentsArr) {
+		for(int i = 0; i < agentsArr.length; i++) {
+			final Agent agent = agentsArr[i];
 			System.out.print(agent);
-			System.out.print('\t');
+			if(i < agentsArr.length-1) System.out.print('\t');
 		}
 		System.out.println();
 		
@@ -113,9 +159,11 @@ public class MultiAgentSystem implements Serializable {
 			final Counter<Agent> affins = agentA.affinities();
 			System.out.print(agentA);
 			System.out.print('\t');
-			for(Agent agentB : agentsArr) {
+			for(int i = 0; i < agentsArr.length; i++) {
+//			for(Agent agentB : agentsArr) {
+				final Agent agentB = agentsArr[i];
 				System.out.print(affins.getCount(agentB));
-				System.out.print('\t');
+				if(i < agentsArr.length-1) System.out.print('\t');
 			}
 			System.out.println();
 		}
@@ -137,8 +185,9 @@ public class MultiAgentSystem implements Serializable {
 		final ColorDB db = new ColorDB("/home/jjfresh/Courses/cs673/colors2.db");
 		
 		final MultiAgentSystem sys = new MultiAgentSystem();
-		final int agentCount = 4;
-		final int iterations = 10;
+		final int agentCount = 10;
+		final int randomAgents = 2;
+		final int iterations = 100;
 		final int topAgentsToPickFrom = 100;
 		final int maxInitialArtefactsPerAgent = 40;
 		final boolean orderArtefactsRandomly = true;
@@ -155,12 +204,17 @@ public class MultiAgentSystem implements Serializable {
 		gag.addGenerator(new CopycatArtefactGenerator(), 0.1);
 		agentFact.setArtefactGeneratorFactory(Util.staticFactory( (ArtefactGenerator) gag));
 		
-		for(int i = 0; i < agentCount-1; i++) {
+		for(int i = 0; i < agentCount-randomAgents; i++) {
 			sys.addAgent(agentFact.instantiate());
 		}
-		sys.addAgent(new RandomAgent(sys,"random"));
+		for(int i = 0; i < randomAgents; i++) {
+			sys.addAgent(new RandomAgent(sys,"random"+i));
+		}
+//		sys.initGraph();
 		
 		sys.run(iterations);
 		sys.dumpResult();
+		
+//		System.out.println(sys.graph.toGEXF());
 	}
 }

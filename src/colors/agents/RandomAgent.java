@@ -12,6 +12,7 @@ import colors.ratings.RandomRatingGenerator;
 
 public class RandomAgent extends ModularAgent {
 	private static final long serialVersionUID = 1L;
+	
 	public RandomAgent(MultiAgentSystem sys, final String id) {
 		super(sys,id,
 				new RandomGenerationPlanner(20),
@@ -19,7 +20,7 @@ public class RandomAgent extends ModularAgent {
 				new RandomPublicationDecider(0.5),
 				new RandomRatingGenerator(0.5),
 				new RandomAffinityInitializer(),
-				new RandomAffinityUpdater(),
+				new RandomAffinityUpdater(0.14),
 				new RandomPreferenceInitializer(),
 				new NullPreferenceUpdater());
 	}
