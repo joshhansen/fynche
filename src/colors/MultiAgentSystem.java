@@ -1,6 +1,6 @@
 /*
  * Things to try:
- * 	Filter preferences/ratings through Wundt curve.
+ *  Filter preferences/ratings through Wundt curve.
  *  Make agents aware of only certain artefacts, e.g. based on affinity/prominence as in Bown&Wiggins 2005.
  */
 package colors;
@@ -25,6 +25,8 @@ import colors.artefacts.generators.GroupedArtefactGenerator;
 import colors.artefacts.generators.SamplingArtefactGenerator;
 import colors.artefacts.genplans.RandomGenerationPlanner;
 import colors.artefacts.initers.RandomAgentArtefactInitializer;
+import colors.artefacts.pubdec.CliqueishPublicationDecider;
+import colors.artefacts.pubdec.SycophanticPublicationDecider;
 import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
@@ -32,6 +34,7 @@ import colors.interfaces.ArtefactGenerator;
 import colors.interfaces.ArtefactInitializer;
 import colors.interfaces.GenerationPlanner;
 import colors.interfaces.PreferenceUpdater;
+import colors.interfaces.PublicationDecider;
 import colors.interfaces.RatingGenerator;
 import colors.prefs.IndependentKDEPreferenceUpdater;
 import colors.ratings.EgocentricRatingGenerator;
@@ -80,7 +83,7 @@ public class MultiAgentSystem implements Serializable {
 			agent.setUp();
 		}
 		for(int i = 0; i < iterations; i++) {
-			if(i % 10 == 0) System.out.print(i + " ");
+			if(i % 10 == 0) System.out.print(" " + i);
 			else System.out.print('.');
 			
 			logger.info("-----Starting round " + i + "-----");
@@ -180,10 +183,12 @@ public class MultiAgentSystem implements Serializable {
 		if(affinitiesOutput != null) {
 			try {
 				affinitiesOutput.append(affinities_);
+				affinitiesOutput.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		
 //		affinities.append(affinities_);
 //		System.out.println(affinities_);
 	}
@@ -208,6 +213,7 @@ public class MultiAgentSystem implements Serializable {
 					}
 				}
 			}
+			w.flush();
 			w.close();
 		} catch(IOException e) {
 			e.printStackTrace();
@@ -224,19 +230,22 @@ public class MultiAgentSystem implements Serializable {
 //		}
 //	}
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		Util.initLogging();
 		
 		final String baseDir = System.getenv("HOME") + "/Courses/cs673";
-		final String outputDir = baseDir + "/svn/output";
+		final String outputDir = baseDir + "/cs673svn/output";
 		final ColorDB db = new ColorDB(baseDir + "/colors2.db");
 		
-		final MultiAgentSystem sys = new MultiAgentSystem();
+		final MultiAgentSystem sys = MultiAgentSystem.instance();
 		final int agentCount = 10;
-		final int randomAgents = 2;
+		final int randomAgents = 0;
+		final double copycatWeight = 0.4;
 		final int iterations = 100;
 		final int topAgentsToPickFrom = 100;
 		final int maxInitialArtefactsPerAgent = 40;
+		final int suckUpToThisManyAgents = 5;
 		final boolean orderArtefactsRandomly = true;
 		
 		final StringBuilder name = new StringBuilder();
@@ -250,20 +259,33 @@ public class MultiAgentSystem implements Serializable {
 		name.append(topAgentsToPickFrom);
 		name.append("_maxartinit");
 		name.append(maxInitialArtefactsPerAgent);
-		name.append("_artrandomorder");
-		name.append(orderArtefactsRandomly);
+		if(copycatWeight > 0.0) {
+			name.append("_copycat");
+			name.append(copycatWeight);
+		}
+		if(orderArtefactsRandomly)
+			name.append("_artrandomorder");
+		name.append("_cliquish");
+		name.append(suckUpToThisManyAgents);
+//		name.append("_2");
 		
 		final ModularAgentFactory agentFact = new ModularAgentFactory(sys);
-		agentFact.setPreferenceUpdaterFactory(Util.staticFactory( (PreferenceUpdater) new IndependentKDEPreferenceUpdater()));
+//		agentFact.setPublicationDeciderFactory(Util.staticFactory(  (PublicationDecider)  new SycophanticPublicationDecider(suckUpToThisManyAgents)));
+		agentFact.setPublicationDeciderFactory(Util.staticFactory(  (PublicationDecider)  new CliqueishPublicationDecider(suckUpToThisManyAgents)));
+		agentFact.setPreferenceUpdaterFactory(Util.staticFactory(   (PreferenceUpdater)   new IndependentKDEPreferenceUpdater()));
 		agentFact.setArtefactInitializerFactory(Util.staticFactory( (ArtefactInitializer) new RandomAgentArtefactInitializer(db, topAgentsToPickFrom, maxInitialArtefactsPerAgent, orderArtefactsRandomly)));
-		agentFact.setGenerationPlannerFactory(Util.staticFactory( (GenerationPlanner) new RandomGenerationPlanner(10)));
-		agentFact.setRatingGeneratorFactory(Util.staticFactory( (RatingGenerator) new EgocentricRatingGenerator()));
-		agentFact.setAffinityUpdaterFactory(Util.staticFactory( (AffinityUpdater) new AverageRatingAffinityUpdater()));
+		agentFact.setGenerationPlannerFactory(Util.staticFactory(   (GenerationPlanner)   new RandomGenerationPlanner(10)));
+		agentFact.setRatingGeneratorFactory(Util.staticFactory(     (RatingGenerator)     new EgocentricRatingGenerator()));
+		agentFact.setAffinityUpdaterFactory(Util.staticFactory(     (AffinityUpdater)     new AverageRatingAffinityUpdater()));
 		
-		final GroupedArtefactGenerator gag = new GroupedArtefactGenerator();
-		gag.addGenerator(new SamplingArtefactGenerator(), 0.9);
-		gag.addGenerator(new CopycatArtefactGenerator(), 0.1);
-		agentFact.setArtefactGeneratorFactory(Util.staticFactory( (ArtefactGenerator) gag));
+		if(copycatWeight > 0.0) {
+			final GroupedArtefactGenerator gag = new GroupedArtefactGenerator();
+			gag.addGenerator(new SamplingArtefactGenerator(), 1.0-copycatWeight);
+			gag.addGenerator(new CopycatArtefactGenerator(), copycatWeight);
+			agentFact.setArtefactGeneratorFactory(Util.staticFactory( (ArtefactGenerator) gag));
+		} else {
+			agentFact.setArtefactGeneratorFactory(Util.staticFactory( (ArtefactGenerator) new SamplingArtefactGenerator()));
+		}
 		
 		for(int i = 0; i < agentCount-randomAgents; i++) {
 			sys.addAgent(agentFact.instantiate());
@@ -280,6 +302,7 @@ public class MultiAgentSystem implements Serializable {
 		sys.run(iterations);
 		sys.dumpResult(outputDir+"/results/" + name + ".txt");
 		
+		System.out.println("\nGenerated " + name);
 //		System.out.println(sys.graph.toGEXF());
 	}
 }

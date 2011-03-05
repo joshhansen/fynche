@@ -87,7 +87,7 @@ public class ModularAgent extends AbstractAgent {
 				msg.append(a.toString());
 				artefacts.add(a, sys.round());
 				for(final Agent other : sys.agents()) {
-					if(other != this && pubDec.shouldPublish(a, other))
+					if(other != this && pubDec.shouldPublish(this, a, other))
 						publishedArtefacts.get(other).add(a, sys.round());
 				}
 				logger.fine(msg.toString());

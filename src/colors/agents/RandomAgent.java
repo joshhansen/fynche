@@ -9,6 +9,7 @@ import colors.artefacts.generators.RandomNamedColorGenerator;
 import colors.artefacts.genplans.RandomGenerationPlanner;
 import colors.artefacts.initers.NullArtefactInitializer;
 import colors.artefacts.pubdec.RandomPublicationDecider;
+import colors.artefacts.pubdec.SycophanticPublicationDecider;
 import colors.prefs.NullPreferenceUpdater;
 import colors.prefs.RandomPreferenceInitializer;
 import colors.ratings.NullRatingInitializer;
@@ -20,7 +21,7 @@ public class RandomAgent extends ModularAgent {
 	private static final Random rand = new Random();
 	public RandomAgent(MultiAgentSystem sys, final String id) {
 		super(sys,id,
-			new RandomPublicationDecider(rand.nextDouble()),
+			new SycophanticPublicationDecider(5),
 			new RandomGenerationPlanner(rand.nextInt(20)),
 			new NullArtefactInitializer(),
 			new RandomNamedColorGenerator(),

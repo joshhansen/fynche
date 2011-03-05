@@ -13,6 +13,7 @@ public class SimpleRating implements Rating {
 	private final double rating;
 	
 	public SimpleRating(Agent rater, Agent artefactCreator, Artefact artefact, double rating) {
+		if(rater == artefactCreator) throw new IllegalArgumentException("Somebody is rating themselves. This is probably not what is wanted.");
 		this.rater = rater;
 		this.artefactCreator = artefactCreator;
 		this.artefact = artefact;

@@ -15,7 +15,7 @@ public class RandomPublicationDecider implements PublicationDecider {
 	}
 
 	@Override
-	public boolean shouldPublish(Artefact artefact, Agent toAgent) {
+	public boolean shouldPublish(Agent potentialPublisher, Artefact artefact, Agent toAgent) {
 		return rand.nextDouble() <= p;
 	}
 

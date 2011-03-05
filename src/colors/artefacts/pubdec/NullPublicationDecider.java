@@ -14,7 +14,7 @@ public class NullPublicationDecider implements PublicationDecider {
 			}};
 	}
 	@Override
-	public boolean shouldPublish(Artefact artefact, Agent toAgent) {
+	public boolean shouldPublish(Agent potentialPublisher, Artefact artefact, Agent toAgent) {
 		return false;
 	}
 }

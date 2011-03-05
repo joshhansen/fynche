@@ -1,12 +1,16 @@
 #!/usr/bin/ruby
 
 # Get the arguments from the command-line (the URL)
-if ARGV.size < 3
-	puts "Proper usage: makeMovie.rb <input file> <output file> <temporary image dir>"
+if ARGV.size < 1
+	puts "Proper usage: makeMovie.rb <affinities file>"
 	exit
 end
 
-inputFile = File.new(ARGV[0], "r")
+inputFileName = ARGV[0]
+inputFile = File.new(inputFileName, "r")
+outputFileName = inputFileName.gsub(".txt",".mpg").gsub("output/affinities","output/movies")
+imagesDirName = inputFileName.gsub(".txt","").gsub("output/affinities","output/images")
+
 maxaffinity = 0.0
 
 class Round
@@ -82,7 +86,7 @@ puts "Max affinity: #{maxaffinity}"
 rounds.each{|round| round.normalize(maxaffinity)}
 
 # Now, take each of the tables and create an image plot for each one
-`mkdir -p #{ARGV[2]}`
+`mkdir -p #{imagesDirName}`
 
 for i in 0..rounds.size-1
     round = rounds[i]
@@ -93,9 +97,9 @@ for i in 0..rounds.size-1
     x <- #{list_as_c(round.x)};
     y <- #{list_as_c(round.y)};
     z <- #{list_as_c(round.z)};
-    GDD(\"#{ARGV[2]}/#{sprintf("%07d",i)}.jpg\", type=\"jpeg\", width=800, height=800); 
+    GDD(\"#{imagesDirName}/#{sprintf("%07d",i)}.jpg\", type=\"jpeg\", width=800, height=800); 
     quilt.plot(cbind(x,y),z,nx=#{agent_count},ny=#{agent_count}, zlim=c(0.0,1.0));
     dev.off();'`
 end
 
-`mencoder "mf://#{ARGV[2]}/*.jpg" -mf fps=4 -o #{ARGV[1]} -ovc lavc -lavcopts vcodec=msmpeg4v2:vbitrate=1800`
+`mencoder "mf://#{imagesDirName}/*.jpg" -mf fps=4 -o #{outputFileName} -ovc lavc -lavcopts vcodec=msmpeg4v2:vbitrate=1800`
