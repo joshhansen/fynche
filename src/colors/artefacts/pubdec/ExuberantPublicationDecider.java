@@ -1,5 +1,6 @@
 package colors.artefacts.pubdec;
 
+import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.Factory;
 import colors.interfaces.PublicationDecider;
@@ -14,7 +15,7 @@ public class ExuberantPublicationDecider implements PublicationDecider {
 		};
 	}
 	@Override
-	public boolean shouldPublish(Artefact artefact) {
+	public boolean shouldPublish(Artefact artefact, Agent toAgent) {
 		return true;
 	}
 }

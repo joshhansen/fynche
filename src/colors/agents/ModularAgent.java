@@ -3,7 +3,6 @@ package colors.agents;
 import java.util.logging.Logger;
 
 import colors.MultiAgentSystem;
-import colors.artefacts.initers.NullArtefactInitializer;
 import colors.exceptions.ArtefactGenerationException;
 import colors.interfaces.AffinityInitializer;
 import colors.interfaces.AffinityUpdater;
@@ -15,69 +14,54 @@ import colors.interfaces.GenerationPlanner;
 import colors.interfaces.PreferenceInitializer;
 import colors.interfaces.PreferenceUpdater;
 import colors.interfaces.PublicationDecider;
-import colors.interfaces.RatingInitializer;
 import colors.interfaces.RatingGenerator;
-import colors.ratings.NullRatingInitializer;
+import colors.interfaces.RatingInitializer;
 
 public class ModularAgent extends AbstractAgent {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(ModularAgent.class.getName());
 	
-	private final AffinityInitializer affinityIniter;
-	private final AffinityUpdater affinityUpdater;
-	private final GenerationPlanner genPlan;
 	private final PublicationDecider pubDec;
+	private final GenerationPlanner genPlan;
+	private final ArtefactInitializer artIniter;
 	private final ArtefactGenerator artGen;
-	private final RatingGenerator ratingGenerator;
 	private final PreferenceInitializer prefIniter;
 	private final PreferenceUpdater prefUpdater;
-	private final ArtefactInitializer artIniter;
 	private final RatingInitializer ratingIniter;
-	public ModularAgent(
-			MultiAgentSystem sys,
-			final String id,
-			GenerationPlanner genPlan,
-			ArtefactGenerator artGen,
-			PublicationDecider pubDec, 
-			RatingGenerator ratingStrategy,
-			AffinityInitializer affinityIniter,
-			AffinityUpdater affinityUpdater, 
-			PreferenceInitializer prefIniter,
-			PreferenceUpdater prefUpdater) {
-		this(sys, id, genPlan, artGen, pubDec, ratingStrategy, affinityIniter, affinityUpdater, prefIniter, prefUpdater,
-			new NullArtefactInitializer(), new NullRatingInitializer());
-	}
+	private final RatingGenerator ratingGenerator;
+	private final AffinityInitializer affinityIniter;
+	private final AffinityUpdater affinityUpdater;
 	
 	public ModularAgent(
-			MultiAgentSystem sys,
+			final MultiAgentSystem sys,
 			final String id,
-			GenerationPlanner genPlan,
-			ArtefactGenerator artGen,
-			PublicationDecider pubDec, 
-			RatingGenerator ratingStrategy,
-			AffinityInitializer affinityIniter,
-			AffinityUpdater affinityUpdater, 
-			PreferenceInitializer prefIniter,
-			PreferenceUpdater prefUpdater,
-			ArtefactInitializer artIniter,
-			RatingInitializer ratingIniter) {
+			final PublicationDecider pubDec,
+			final GenerationPlanner genPlan,
+			final ArtefactInitializer artIniter,
+			final ArtefactGenerator artGen, 
+			final PreferenceInitializer prefIniter,
+			final PreferenceUpdater prefUpdater,
+			final RatingInitializer ratingIniter, 
+			final RatingGenerator ratingStrategy,
+			final AffinityInitializer affinityIniter,
+			final AffinityUpdater affinityUpdater) {
 		super(sys, id);
-		this.affinityIniter = affinityIniter;
-		this.genPlan = genPlan;
 		this.pubDec = pubDec;
+		this.genPlan = genPlan;
+		this.artIniter = artIniter;
 		this.artGen = artGen;
-		this.affinityUpdater = affinityUpdater;
-		this.ratingGenerator = ratingStrategy;
 		this.prefIniter = prefIniter;
 		this.prefUpdater = prefUpdater;
 		this.ratingIniter = ratingIniter;
-		this.artIniter = artIniter;
+		this.ratingGenerator = ratingStrategy;
+		this.affinityIniter = affinityIniter;
+		this.affinityUpdater = affinityUpdater;
 	}
 
 	@Override
 	public void setUp() {
 		logger.fine("Setting up agent " + this);
-		this.publishedArtefacts.add(artIniter.initialArtefacts(this), 0);
+		this.artefacts.add(artIniter.initialArtefacts(this), 0);
 		this.ratings.add(ratingIniter.initialRatings(this), 0);
 		
 		affinities = affinityIniter.initialAffinities(this);
@@ -101,9 +85,10 @@ public class ModularAgent extends AbstractAgent {
 				msg.append(this.toString());
 				msg.append(" generated artefact ");
 				msg.append(a.toString());
-				if(pubDec.shouldPublish(a)) {
-					publishedArtefacts.add(a, sys.round());
-					msg.append(" (PUBLISHED)");
+				artefacts.add(a, sys.round());
+				for(final Agent other : sys.agents()) {
+					if(other != this && pubDec.shouldPublish(a, other))
+						publishedArtefacts.get(other).add(a, sys.round());
 				}
 				logger.fine(msg.toString());
 			} catch(ArtefactGenerationException e) {

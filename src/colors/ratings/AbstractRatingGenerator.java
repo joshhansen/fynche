@@ -16,7 +16,7 @@ public abstract class AbstractRatingGenerator implements RatingGenerator {
 		final int currentRound = rater.system().round();
 		for(Agent other : rater.system().agents()) {
 			if(other != rater) {
-				for(Artefact artefact : other.publishedArtefacts(currentRound - 1)) {
+				for(Artefact artefact : other.artefacts(rater, currentRound - 1)) {
 					if(shouldRate(rater, other, artefact)) {
 						Rating rating = rate(rater, other, artefact);
 						if(rating != null) {

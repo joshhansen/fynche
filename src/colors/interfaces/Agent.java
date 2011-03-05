@@ -46,9 +46,20 @@ public interface Agent extends Serializable {
 	 */
 	public void takeDown();
 	
-	public Set<Artefact> publishedArtefacts();
+	public Set<Artefact> artefacts();
+//	
+//	public Set<Artefact> artefacts(final int roundNum);
 	
-	public Set<Artefact> publishedArtefacts(final int roundNum);
+	/**
+	 * This agent returns a set of agents that it wishes to make available to agent <code>inquirer</code>.
+	 */
+	public Set<Artefact> artefacts(final Agent inquirer);
+	
+	/**
+	 * This agent returns a set of agents that it wishes to make available to agent <code>inquirer</code>
+	 * in round <code>roundNum</code>.
+	 */
+	public Set<Artefact> artefacts(final Agent inquirer, final int roundNum);
 	
 	public Set<Rating> ratings();
 	

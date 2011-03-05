@@ -26,9 +26,9 @@ import colors.ratings.NullRatingInitializer;
 
 public class ModularAgentFactory implements Factory<Agent> {
 	private int nextAgentNum = 0;
-	private Factory<GenerationPlanner> generationPlannerFactory = NullGenerationPlanner.factory();
 	
 	private Factory<PublicationDecider> publicationDeciderFactory = ExuberantPublicationDecider.factory();
+	private Factory<GenerationPlanner> generationPlannerFactory = NullGenerationPlanner.factory();
 	
 	private Factory<ArtefactInitializer> artefactInitializerFactory = NullArtefactInitializer.factory();
 	private Factory<ArtefactGenerator> artefactGeneratorFactory = NullArtefactGenerator.factory();
@@ -54,16 +54,16 @@ public class ModularAgentFactory implements Factory<Agent> {
 		final String id = "agent" + nextAgentNum++;
 		return new ModularAgent(
 			system,id,
-			generationPlannerFactory.instantiate(),
-			artefactGeneratorFactory.instantiate(),
 			publicationDeciderFactory.instantiate(),
-			ratingStrategyFactory.instantiate(),
-			affinityInitializerFactory.instantiate(),
-			affinityUpdaterFactory.instantiate(),
+			generationPlannerFactory.instantiate(),
+			artefactInitializerFactory.instantiate(),
+			artefactGeneratorFactory.instantiate(),
 			preferenceInitializerFactory.instantiate(),
 			preferenceUpdaterFactory.instantiate(),
-			artefactInitializerFactory.instantiate(),
-			ratingInitializerFactory.instantiate());
+			ratingInitializerFactory.instantiate(),
+			ratingStrategyFactory.instantiate(),
+			affinityInitializerFactory.instantiate(),
+			affinityUpdaterFactory.instantiate());
 	}
 
 	public Factory<GenerationPlanner> getGenerationPlannerFactory() {

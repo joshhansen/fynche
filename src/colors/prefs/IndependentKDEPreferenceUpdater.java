@@ -86,7 +86,7 @@ public class IndependentKDEPreferenceUpdater implements PreferenceUpdater {
 		final SampleableKernelEstimator b = new SampleableKernelEstimator(1);
 		final Counter<String> words = new Counter<String>();
 		final Counter<Integer> tokenCounts = new Counter<Integer>();
-		for(Artefact a : agentB.publishedArtefacts()) {
+		for(Artefact a : agentB.artefacts()) {
 			if(a instanceof NamedColor) {
 				NamedColor nc = (NamedColor) a;
 				Color color = nc.getColor();
