@@ -3,12 +3,10 @@ package colors.util;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 
 public class Counter<T> {
-	private static final Random rand = new Random();
 	private Map<T,Double> counts = new HashMap<T,Double>();
 	
 	public void increment(T item) {
@@ -60,7 +58,7 @@ public class Counter<T> {
 	 */
 	public T sample() {
 		final double total = totalCount();
-		final double position = rand.nextDouble();
+		final double position = Rand.nextDouble();
 		double sum = 0.0;
 		for(Entry<T,Double> entry : counts.entrySet()) {
 			final double thisCount = entry.getValue().doubleValue() / total;

@@ -1,11 +1,11 @@
 package colors.affinities;
 
-import colors.MultiAgentSystem;
 import colors.interfaces.AffinityCombo;
 import colors.interfaces.Agent;
 import colors.interfaces.Factory;
 import colors.util.Counter;
 import colors.util.CounterMap;
+import colors.util.Rand;
 import colors.util.Util.SmartStaticFactory;
 
 public class ObsessiveAffinityCombo implements AffinityCombo {
@@ -30,7 +30,7 @@ public class ObsessiveAffinityCombo implements AffinityCombo {
 		final Agent[] agents = obsesser.system().agents().toArray(new Agent[0]);
 		Agent objectOfObsession = null;
 		do {
-			final int chosen = MultiAgentSystem.rand.nextInt(agents.length);
+			final int chosen = Rand.nextInt(agents.length);
 			objectOfObsession = agents[chosen];
 		} while(objectOfObsession==obsesser);
 		
@@ -47,7 +47,7 @@ public class ObsessiveAffinityCombo implements AffinityCombo {
 	
 	@Override
 	public Counter<Agent> newAffinities(Agent agent) {
-		if(!affins.containsKey(agent) || MultiAgentSystem.rand.nextDouble() < changeProb)
+		if(!affins.containsKey(agent) || Rand.nextDouble() < changeProb)
 			return chooseNewObsession(agent);
 		return affins.getCounter(agent);
 	}

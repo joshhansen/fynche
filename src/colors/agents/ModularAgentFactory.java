@@ -6,11 +6,12 @@ import colors.affinities.RandomAffinityCombo;
 import colors.artefacts.generators.RandomNamedColorGenerator;
 import colors.artefacts.genplans.FixedGenerationPlanner;
 import colors.artefacts.genplans.NullGenerationPlanner;
+import colors.artefacts.genplans.RandomGenerationPlanner;
 import colors.artefacts.initers.NullArtefactCombo;
 import colors.artefacts.pubdec.ExuberantPublicationDecider;
+import colors.artefacts.pubdec.SycophanticPublicationDecider;
 import colors.interfaces.AffinityInitializer;
 import colors.interfaces.AffinityUpdater;
-import colors.interfaces.Agent;
 import colors.interfaces.ArtefactGenerator;
 import colors.interfaces.ArtefactInitializer;
 import colors.interfaces.Factory;
@@ -21,10 +22,13 @@ import colors.interfaces.PublicationDecider;
 import colors.interfaces.RatingGenerator;
 import colors.interfaces.RatingInitializer;
 import colors.prefs.NullPreferenceCombo;
+import colors.prefs.RandomPreferenceInitializer;
 import colors.ratings.NullRatingCombo;
+import colors.ratings.RandomRatingGenerator;
+import colors.util.Rand;
 
 public class ModularAgentFactory implements Factory<ModularAgent> {
-	public static Factory<ModularAgent> dumbAgentFactory(final MultiAgentSystem sys) {
+	public static ModularAgentFactory dumbAgentFactory(final MultiAgentSystem sys) {
 		final ModularAgentFactory maf = new ModularAgentFactory(sys);
 		maf.setPublicationDeciderFactory(ExuberantPublicationDecider.factory);
 		maf.setGenerationPlannerFactory(FixedGenerationPlanner.factory(1));
@@ -36,6 +40,21 @@ public class ModularAgentFactory implements Factory<ModularAgent> {
 		maf.setRatingGeneratorFactory(NullRatingCombo.factory);
 		maf.setAffinityInitializerFactory(RandomAffinityCombo.factory);
 		maf.setAffinityUpdaterFactory(NullAffinityCombo.factory);
+		return maf;
+	}
+	
+	public static ModularAgentFactory randomAgentFactory(final MultiAgentSystem sys) {
+		final ModularAgentFactory maf = new ModularAgentFactory(sys);
+		maf.setPublicationDeciderFactory(SycophanticPublicationDecider.factory(5));
+		maf.setGenerationPlannerFactory(RandomGenerationPlanner.factory(Rand.nextInt(20)));
+		maf.setArtefactInitializerFactory(NullArtefactCombo.factory);
+		maf.setArtefactGeneratorFactory(RandomNamedColorGenerator.factory);
+		maf.setPreferenceInitializerFactory(RandomPreferenceInitializer.factory);
+		maf.setPreferenceUpdaterFactory(NullPreferenceCombo.factory);
+		maf.setRatingInitializerFactory(NullRatingCombo.factory);
+		maf.setRatingGeneratorFactory(RandomRatingGenerator.factory(Rand.nextDouble()));
+		maf.setAffinityInitializerFactory(RandomAffinityCombo.factory);
+		maf.setAffinityUpdaterFactory(RandomAffinityCombo.factory);
 		return maf;
 	}
 	

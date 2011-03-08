@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -15,12 +14,12 @@ import colors.ColorDB;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.ArtefactInitializer;
+import colors.util.Rand;
 
 public class RandomAgentArtefactInitializer implements ArtefactInitializer {
 	private static final Logger logger = Logger.getLogger(RandomAgentArtefactInitializer.class.getName());
 	private final ColorDB db;
 	private final List<Integer> topNids;
-	private static final Random rand = new Random();
 	private final int maxArtefacts;
 	private final boolean orderArtefactsRandomly;
 	public RandomAgentArtefactInitializer(final ColorDB db, final int topN, final int maxArtefacts, final boolean orderArtefactsRandomly) {
@@ -47,7 +46,7 @@ public class RandomAgentArtefactInitializer implements ArtefactInitializer {
 	@Override
 	public Set<Artefact> initialArtefacts(Agent agent) {
 		logger.finer("Generating initial artefacts for agent " + agent);
-		Integer id = topNids.get(rand.nextInt(topNids.size()));
+		Integer id = topNids.get(Rand.nextInt(topNids.size()));
 		Iterator<Integer> colorIDs = db.getUserColorIDs(id, orderArtefactsRandomly);
 		
 		Set<Artefact> arts = new HashSet<Artefact>();

@@ -1,11 +1,10 @@
 package colors.affinities;
 
-import java.util.Random;
-
 import colors.interfaces.AffinityCombo;
 import colors.interfaces.Agent;
 import colors.interfaces.Factory;
 import colors.util.Counter;
+import colors.util.Rand;
 import colors.util.Util.SmartStaticFactory;
 
 public class RandomAffinityCombo implements AffinityCombo {
@@ -16,7 +15,6 @@ public class RandomAffinityCombo implements AffinityCombo {
 		}
 	};
 	
-	private static final Random rand = new Random();
 	private final double maxAffin;
 	
 	public RandomAffinityCombo() {
@@ -32,7 +30,7 @@ public class RandomAffinityCombo implements AffinityCombo {
 		Counter<Agent> affins = new Counter<Agent>();
 		for(Agent otherAgent : agent.system().agents()) {
 			if(otherAgent != agent) {
-				affins.setCount(otherAgent, rand.nextDouble()*maxAffin);
+				affins.setCount(otherAgent, Rand.nextDouble()*maxAffin);
 			}
 		}
 		affins.normalize();

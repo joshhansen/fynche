@@ -1,7 +1,5 @@
 package colors.util;
 
-import java.util.Random;
-
 import weka.estimators.KernelEstimator;
 
 public class SampleableKernelEstimator extends KernelEstimator {
@@ -10,8 +8,7 @@ public class SampleableKernelEstimator extends KernelEstimator {
 	public SampleableKernelEstimator(double precision) {
 		super(precision);
 	}
-
-	private static final Random rand = new Random();
+	
 	public Double sample(final double min, final double max, final double stepSize) {
 		final int binCount = (int) ((max-min)/stepSize);
 		double totalProb = 0.0;
@@ -25,7 +22,7 @@ public class SampleableKernelEstimator extends KernelEstimator {
 			i++;
 		}
 		
-		final double position = rand.nextDouble();
+		final double position = Rand.nextDouble();
 		double sum = 0.0;
 		for(int j = 0; j < binCount; j++) {
 			final double normedProb = probs[j] / totalProb;

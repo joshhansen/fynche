@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -22,7 +21,6 @@ import colors.affinities.NullAffinityCombo;
 import colors.affinities.ObsessiveAffinityCombo;
 import colors.affinities.RandomAffinityCombo;
 import colors.agents.ModularAgentFactory;
-import colors.agents.RandomAgent;
 import colors.artefacts.generators.CopycatArtefactGenerator;
 import colors.artefacts.generators.GroupedArtefactGenerator;
 import colors.artefacts.generators.SamplingArtefactGenerator;
@@ -51,7 +49,6 @@ import colors.util.Util;
 import colors.util.Util.SmartStaticFactory;
 
 public class MultiAgentSystem implements Serializable {
-	public static final Random rand = new Random();
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(MultiAgentSystem.class.getName());
 	
@@ -305,8 +302,9 @@ public class MultiAgentSystem implements Serializable {
 			sys.addAgent(agentFact.instantiate("eccentric"+i));
 		}
 		
+		ModularAgentFactory randFact = ModularAgentFactory.randomAgentFactory(sys);
 		for(int i = 0; i < randomAgents; i++) {
-			sys.addAgent(new RandomAgent(sys,"random"+i));
+			sys.addAgent(randFact.instantiate("random"+i));
 		}
 		
 		sys.addRoundFinishedListener(new AffinitiesRecorder(outputDir + "/affinities/" + name + ".txt"));

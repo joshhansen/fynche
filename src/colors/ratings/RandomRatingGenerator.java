@@ -1,13 +1,22 @@
 package colors.ratings;
 
-import java.util.Random;
-
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
+import colors.interfaces.Factory;
 import colors.interfaces.Rating;
+import colors.util.Rand;
+import colors.util.Util.SmartStaticFactory;
 
 public class RandomRatingGenerator extends AbstractRatingGenerator {
-	private static final Random rand = new Random();
+	public static Factory<RandomRatingGenerator> factory(final double p) {
+		return new SmartStaticFactory<RandomRatingGenerator>(){
+			@Override
+			protected RandomRatingGenerator instantiate_() {
+				return new RandomRatingGenerator(p);
+			}
+		};
+	}
+	
 	private final double p;
 	
 	public RandomRatingGenerator() {
@@ -26,12 +35,12 @@ public class RandomRatingGenerator extends AbstractRatingGenerator {
 
 	@Override
 	protected Rating rate(Agent rater, Agent other, Artefact artefact) {
-		return new SimpleRating(rater, other, artefact, rand.nextDouble());
+		return new SimpleRating(rater, other, artefact, Rand.nextDouble());
 	}
 	
 	@Override
 	protected boolean shouldRate(Agent rater, Agent other, Artefact artefact) {
-		return rand.nextDouble() <= p;
+		return Rand.nextDouble() <= p;
 	}
 
 }

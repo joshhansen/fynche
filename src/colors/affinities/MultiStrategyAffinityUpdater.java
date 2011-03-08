@@ -1,10 +1,10 @@
 package colors.affinities;
 
-import colors.MultiAgentSystem;
 import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
 import colors.interfaces.Factory;
 import colors.util.Counter;
+import colors.util.Rand;
 
 public class MultiStrategyAffinityUpdater extends GroupedAffinityUpdater {
 	public static final Factory<MultiStrategyAffinityUpdater> factory(final Counter<Factory<? extends AffinityUpdater>> affinUpFacts, final double transitionProb) {
@@ -31,7 +31,7 @@ public class MultiStrategyAffinityUpdater extends GroupedAffinityUpdater {
 	}
 	
 	protected void ensureStrategy() {
-		if(currentStrategy == null || MultiAgentSystem.rand.nextDouble() < transitionProb)
+		if(currentStrategy == null || Rand.nextDouble() < transitionProb)
 			currentStrategy = generators.sample();
 	}
 	

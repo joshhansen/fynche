@@ -6,9 +6,11 @@ import java.util.List;
 import colors.MultiAgentSystem;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
+import colors.interfaces.Factory;
 import colors.interfaces.PublicationDecider;
 import colors.interfaces.Rating;
 import colors.util.Counter;
+import colors.util.Util.SmartStaticFactory;
 
 /**
  * Tries to show off to the most popular agents
@@ -16,6 +18,15 @@ import colors.util.Counter;
  *
  */
 public class SycophanticPublicationDecider implements PublicationDecider {
+	public static Factory<SycophanticPublicationDecider> factory(final int topN) {
+		return new SmartStaticFactory<SycophanticPublicationDecider>(){
+			@Override
+			protected SycophanticPublicationDecider instantiate_() {
+				return new SycophanticPublicationDecider(topN);
+			}
+		};
+	}
+	
 	private final int topN;
 	private Integer lastUpdated = null;
 //	private Map<Agent,Double> averageRatings = new HashMap<Agent,Double>();
