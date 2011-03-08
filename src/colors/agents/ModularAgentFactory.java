@@ -1,11 +1,12 @@
 package colors.agents;
 
 import colors.MultiAgentSystem;
-import colors.affinities.NullAffinityUpdater;
-import colors.affinities.RandomAffinityInitializer;
-import colors.artefacts.generators.NullArtefactGenerator;
+import colors.affinities.NullAffinityCombo;
+import colors.affinities.RandomAffinityCombo;
+import colors.artefacts.generators.RandomNamedColorGenerator;
+import colors.artefacts.genplans.FixedGenerationPlanner;
 import colors.artefacts.genplans.NullGenerationPlanner;
-import colors.artefacts.initers.NullArtefactInitializer;
+import colors.artefacts.initers.NullArtefactCombo;
 import colors.artefacts.pubdec.ExuberantPublicationDecider;
 import colors.interfaces.AffinityInitializer;
 import colors.interfaces.AffinityUpdater;
@@ -19,28 +20,41 @@ import colors.interfaces.PreferenceUpdater;
 import colors.interfaces.PublicationDecider;
 import colors.interfaces.RatingGenerator;
 import colors.interfaces.RatingInitializer;
-import colors.prefs.NullPreferenceInitializer;
-import colors.prefs.NullPreferenceUpdater;
-import colors.ratings.NullRatingGenerator;
-import colors.ratings.NullRatingInitializer;
+import colors.prefs.NullPreferenceCombo;
+import colors.ratings.NullRatingCombo;
 
-public class ModularAgentFactory implements Factory<Agent> {
+public class ModularAgentFactory implements Factory<ModularAgent> {
+	public static Factory<ModularAgent> dumbAgentFactory(final MultiAgentSystem sys) {
+		final ModularAgentFactory maf = new ModularAgentFactory(sys);
+		maf.setPublicationDeciderFactory(ExuberantPublicationDecider.factory);
+		maf.setGenerationPlannerFactory(FixedGenerationPlanner.factory(1));
+		maf.setArtefactInitializerFactory(NullArtefactCombo.factory);
+		maf.setArtefactGeneratorFactory(RandomNamedColorGenerator.factory);
+		maf.setPreferenceInitializerFactory(NullPreferenceCombo.factory);
+		maf.setPreferenceUpdaterFactory(NullPreferenceCombo.factory);
+		maf.setRatingInitializerFactory(NullRatingCombo.factory);
+		maf.setRatingGeneratorFactory(NullRatingCombo.factory);
+		maf.setAffinityInitializerFactory(RandomAffinityCombo.factory);
+		maf.setAffinityUpdaterFactory(NullAffinityCombo.factory);
+		return maf;
+	}
+	
 	private int nextAgentNum = 0;
 	
-	private Factory<PublicationDecider> publicationDeciderFactory = ExuberantPublicationDecider.factory();
-	private Factory<GenerationPlanner> generationPlannerFactory = NullGenerationPlanner.factory();
+	private Factory<? extends PublicationDecider> publicationDeciderFactory = ExuberantPublicationDecider.factory;
+	private Factory<? extends GenerationPlanner> generationPlannerFactory = NullGenerationPlanner.factory;
 	
-	private Factory<ArtefactInitializer> artefactInitializerFactory = NullArtefactInitializer.factory();
-	private Factory<ArtefactGenerator> artefactGeneratorFactory = NullArtefactGenerator.factory();
+	private Factory<? extends ArtefactInitializer> artefactInitializerFactory = NullArtefactCombo.factory;
+	private Factory<? extends ArtefactGenerator> artefactGeneratorFactory = NullArtefactCombo.factory;
 	
-	private Factory<RatingInitializer> ratingInitializerFactory = NullRatingInitializer.factory();
-	private Factory<RatingGenerator> ratingStrategyFactory = NullRatingGenerator.factory();
+	private Factory<? extends RatingInitializer> ratingInitializerFactory = NullRatingCombo.factory;
+	private Factory<? extends RatingGenerator> ratingStrategyFactory = NullRatingCombo.factory;
 	
-	private Factory<AffinityInitializer> affinityInitializerFactory = RandomAffinityInitializer.factory();
-	private Factory<AffinityUpdater> affinityUpdaterFactory = NullAffinityUpdater.factory();
+	private Factory<? extends AffinityInitializer> affinityInitializerFactory = NullAffinityCombo.factory;
+	private Factory<? extends AffinityUpdater> affinityUpdaterFactory = NullAffinityCombo.factory;
 	
-	private Factory<PreferenceInitializer> preferenceInitializerFactory = NullPreferenceInitializer.factory();
-	private Factory<PreferenceUpdater> preferenceUpdaterFactory = NullPreferenceUpdater.factory();
+	private Factory<? extends PreferenceInitializer> preferenceInitializerFactory = NullPreferenceCombo.factory;
+	private Factory<? extends PreferenceUpdater> preferenceUpdaterFactory = NullPreferenceCombo.factory;
 	
 	
 	
@@ -52,8 +66,12 @@ public class ModularAgentFactory implements Factory<Agent> {
 	@Override
 	public ModularAgent instantiate() {
 		final String id = "agent" + nextAgentNum++;
+		return instantiate(id);
+	}
+	
+	public ModularAgent instantiate(final String agentID) {
 		return new ModularAgent(
-			system,id,
+			system,agentID,
 			publicationDeciderFactory.instantiate(),
 			generationPlannerFactory.instantiate(),
 			artefactInitializerFactory.instantiate(),
@@ -66,93 +84,93 @@ public class ModularAgentFactory implements Factory<Agent> {
 			affinityUpdaterFactory.instantiate());
 	}
 
-	public Factory<GenerationPlanner> getGenerationPlannerFactory() {
+	public Factory<? extends GenerationPlanner> getGenerationPlannerFactory() {
 		return generationPlannerFactory;
 	}
 
 	public void setGenerationPlannerFactory(
-			Factory<GenerationPlanner> generationPlannerFactory) {
+			Factory<? extends GenerationPlanner> generationPlannerFactory) {
 		this.generationPlannerFactory = generationPlannerFactory;
 	}
 
-	public Factory<PublicationDecider> getPublicationDeciderFactory() {
+	public Factory<? extends PublicationDecider> getPublicationDeciderFactory() {
 		return publicationDeciderFactory;
 	}
 
 	public void setPublicationDeciderFactory(
-			Factory<PublicationDecider> publicationDeciderFactory) {
+			Factory<? extends PublicationDecider> publicationDeciderFactory) {
 		this.publicationDeciderFactory = publicationDeciderFactory;
 	}
 
-	public Factory<ArtefactInitializer> getArtefactInitializerFactory() {
+	public Factory<? extends ArtefactInitializer> getArtefactInitializerFactory() {
 		return artefactInitializerFactory;
 	}
 
 	public void setArtefactInitializerFactory(
-			Factory<ArtefactInitializer> artefactInitializerFactory) {
+			Factory<? extends ArtefactInitializer> artefactInitializerFactory) {
 		this.artefactInitializerFactory = artefactInitializerFactory;
 	}
 
-	public Factory<ArtefactGenerator> getArtefactGeneratorFactory() {
+	public Factory<? extends ArtefactGenerator> getArtefactGeneratorFactory() {
 		return artefactGeneratorFactory;
 	}
 
 	public void setArtefactGeneratorFactory(
-			Factory<ArtefactGenerator> artefactGeneratorFactory) {
+			Factory<? extends ArtefactGenerator> artefactGeneratorFactory) {
 		this.artefactGeneratorFactory = artefactGeneratorFactory;
 	}
 
-	public Factory<RatingInitializer> getRatingInitializerFactory() {
+	public Factory<? extends RatingInitializer> getRatingInitializerFactory() {
 		return ratingInitializerFactory;
 	}
 
 	public void setRatingInitializerFactory(
-			Factory<RatingInitializer> ratingInitializerFactory) {
+			Factory<? extends RatingInitializer> ratingInitializerFactory) {
 		this.ratingInitializerFactory = ratingInitializerFactory;
 	}
 
-	public Factory<RatingGenerator> getRatingGeneratorFactory() {
+	public Factory<? extends RatingGenerator> getRatingGeneratorFactory() {
 		return ratingStrategyFactory;
 	}
 
 	public void setRatingGeneratorFactory(
-			Factory<RatingGenerator> ratingStrategyFactory) {
+			Factory<? extends RatingGenerator> ratingStrategyFactory) {
 		this.ratingStrategyFactory = ratingStrategyFactory;
 	}
 
-	public Factory<AffinityInitializer> getAffinityInitializerFactory() {
+	public Factory<? extends AffinityInitializer> getAffinityInitializerFactory() {
 		return affinityInitializerFactory;
 	}
 
 	public void setAffinityInitializerFactory(
-			Factory<AffinityInitializer> affinityInitializerFactory) {
+			Factory<? extends AffinityInitializer> affinityInitializerFactory) {
 		this.affinityInitializerFactory = affinityInitializerFactory;
 	}
 
-	public Factory<AffinityUpdater> getAffinityUpdaterFactory() {
+	public Factory<? extends AffinityUpdater> getAffinityUpdaterFactory() {
 		return affinityUpdaterFactory;
 	}
 
 	public void setAffinityUpdaterFactory(
-			Factory<AffinityUpdater> affinityUpdaterFactory) {
+			Factory<? extends AffinityUpdater> affinityUpdaterFactory) {
 		this.affinityUpdaterFactory = affinityUpdaterFactory;
 	}
 
-	public Factory<PreferenceInitializer> getPreferenceInitializerFactory() {
+	public Factory<? extends PreferenceInitializer> getPreferenceInitializerFactory() {
 		return preferenceInitializerFactory;
 	}
 
 	public void setPreferenceInitializerFactory(
-			Factory<PreferenceInitializer> preferenceInitializerFactory) {
+			Factory<? extends PreferenceInitializer> preferenceInitializerFactory) {
 		this.preferenceInitializerFactory = preferenceInitializerFactory;
 	}
 
-	public Factory<PreferenceUpdater> getPreferenceUpdaterFactory() {
+	public Factory<? extends PreferenceUpdater> getPreferenceUpdaterFactory() {
 		return preferenceUpdaterFactory;
 	}
 
 	public void setPreferenceUpdaterFactory(
-			Factory<PreferenceUpdater> preferenceUpdaterFactory) {
+			Factory<? extends PreferenceUpdater> preferenceUpdaterFactory) {
 		this.preferenceUpdaterFactory = preferenceUpdaterFactory;
 	}
 

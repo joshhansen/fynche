@@ -1,17 +1,19 @@
 package colors.util;
 
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 public class PartitionedSet<T,P> {
-	private final Set<T> all = new HashSet<T>();
+//	private final Set<T> all = new HashSet<T>();
 	private final Map<P,Set<T>> byRound = new HashMap<P,Set<T>>();
 	public void add(final T item, final P partition) {
-		all.add(item);
+//		all.add(item);
 		
 		Set<T> set = byRound.get(partition);
 		if(set == null) {
@@ -28,7 +30,46 @@ public class PartitionedSet<T,P> {
 	}
 	
 	public Set<T> all() {
-		return Collections.unmodifiableSet(all);
+		return new AbstractSet<T>(){
+			@Override
+			public Iterator<T> iterator() {
+				return new Iterator<T>(){
+					Iterator<Set<T>> partIt = byRound.values().iterator();
+					Iterator<T> it = null;
+					
+					@Override
+					public boolean hasNext() {
+						if(it != null && it.hasNext()) return true;
+						if(partIt.hasNext()) return true;
+						return false;
+					}
+					
+					private void refreshIt() {
+						if(it == null || (!it.hasNext() && partIt.hasNext()))
+							it = partIt.next().iterator();
+					}
+
+					@Override
+					public T next() {
+						refreshIt();
+						return it.next();
+					}
+
+					@Override
+					public void remove() {
+						throw new UnsupportedOperationException();
+					}
+				};
+			}
+
+			@Override
+			public int size() {
+				int sum = 0;
+				for(Set<T> partition : byRound.values())
+					sum += partition.size();
+				return sum;
+			}
+		};
 	}
 	
 	public Set<T> partition(final P round) {

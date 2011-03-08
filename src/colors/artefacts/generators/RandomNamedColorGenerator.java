@@ -7,13 +7,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
+import colors.MultiAgentSystem;
 import colors.artefacts.NamedColor;
 import colors.interfaces.Agent;
 import colors.interfaces.ArtefactGenerator;
+import colors.interfaces.Factory;
+import colors.util.Util.SmartStaticFactory;
 
-public class RandomNamedColorGenerator implements ArtefactGenerator {	
+public class RandomNamedColorGenerator implements ArtefactGenerator {
+	public static Factory<RandomNamedColorGenerator> factory = new SmartStaticFactory<RandomNamedColorGenerator>(){
+		@Override
+		protected RandomNamedColorGenerator instantiate_() {
+			return new RandomNamedColorGenerator();
+		}
+	};
+	
 	private static List<String> readAsList(final String filename) {
 		List<String> list = new ArrayList<String>();
 		try {
@@ -28,16 +37,15 @@ public class RandomNamedColorGenerator implements ArtefactGenerator {
 		return list;
 	}
 	
-	private final List<String> dict = Collections.unmodifiableList(readAsList("/usr/share/dict/words"));
+	private static final List<String> dict = Collections.unmodifiableList(readAsList("/usr/share/dict/words"));
 
-	private final Random rand = new Random();
 	@Override
 	public NamedColor generate(Agent agent) {
-		final int r = rand.nextInt(256);
-		final int g = rand.nextInt(256);
-		final int b = rand.nextInt(256);
+		final int r = MultiAgentSystem.rand.nextInt(256);
+		final int g = MultiAgentSystem.rand.nextInt(256);
+		final int b = MultiAgentSystem.rand.nextInt(256);
 		final Color c = new Color(r, g, b);
-		final String word = dict.get(rand.nextInt(dict.size())).replace("'s", "");
+		final String word = dict.get(MultiAgentSystem.rand.nextInt(dict.size())).replace("'s", "");
 		return new NamedColor(c, word);
 	}
 }

@@ -70,6 +70,25 @@ public class Util {
 			}
 		};
 	}
+	
+	public static abstract class SmartStaticFactory<T> implements Factory<T> {
+		private int instantiationRequests = 0;
+		private T obj = null;
+		@Override
+		public T instantiate() {
+			System.out.println("Instance requested for " + this.getClass().getName());
+			instantiationRequests++;
+			if(obj == null)
+				obj = instantiate_();
+			return obj;
+		}
+		
+		protected abstract T instantiate_();
+		
+		public int instantiationRequests() {
+			return instantiationRequests;
+		}
+	}
 
 	public static void initLogging() {
 		try {

@@ -9,15 +9,18 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.Writer;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import colors.affinities.AverageRatingAffinityUpdater;
+import colors.affinities.IndifferentAffinityCombo;
+import colors.affinities.MultiStrategyAffinityUpdater;
+import colors.affinities.NullAffinityCombo;
+import colors.affinities.ObsessiveAffinityCombo;
+import colors.affinities.RandomAffinityCombo;
 import colors.agents.ModularAgentFactory;
 import colors.agents.RandomAgent;
 import colors.artefacts.generators.CopycatArtefactGenerator;
@@ -26,22 +29,29 @@ import colors.artefacts.generators.SamplingArtefactGenerator;
 import colors.artefacts.genplans.RandomGenerationPlanner;
 import colors.artefacts.initers.RandomAgentArtefactInitializer;
 import colors.artefacts.pubdec.CliqueishPublicationDecider;
-import colors.artefacts.pubdec.SycophanticPublicationDecider;
+import colors.artefacts.pubdec.ExuberantPublicationDecider;
+import colors.artefacts.pubdec.GroupedPublicationDecider;
 import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.ArtefactGenerator;
 import colors.interfaces.ArtefactInitializer;
+import colors.interfaces.Factory;
 import colors.interfaces.GenerationPlanner;
 import colors.interfaces.PreferenceUpdater;
 import colors.interfaces.PublicationDecider;
 import colors.interfaces.RatingGenerator;
-import colors.prefs.IndependentKDEPreferenceUpdater;
+import colors.prefs.DependentWordsPreferenceUpdater;
+import colors.ratings.EccentricRatingGenerator;
 import colors.ratings.EgocentricRatingGenerator;
+import colors.ratings.GroupedRatingGenerator;
+import colors.ratings.RandomRatingGenerator;
 import colors.util.Counter;
 import colors.util.Util;
+import colors.util.Util.SmartStaticFactory;
 
 public class MultiAgentSystem implements Serializable {
+	public static final Random rand = new Random();
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(MultiAgentSystem.class.getName());
 	
@@ -54,8 +64,8 @@ public class MultiAgentSystem implements Serializable {
 	
 	
 	private int round = 0;
-	private Writer affinitiesOutput = null;
-//	private final DynamicGraph graph = new DynamicGraph(Directionality.UNDIRECTED);
+	private Set<RoundFinishedListener> roundFinishedListeners = new HashSet<RoundFinishedListener>();
+	private Set<RunFinishedListener> runFinishedListeners = new HashSet<RunFinishedListener>();
 	private MultiAgentSystem() {
 	}
 	
@@ -63,13 +73,21 @@ public class MultiAgentSystem implements Serializable {
 		return round;
 	}
 	
-	private final Set<Agent> agents = new HashSet<Agent>();
+	final Set<Agent> agents = new HashSet<Agent>();
 	public Set<Agent> agents() {
 		return Collections.unmodifiableSet(agents);
 	}
 	
 	public void addAgent(final Agent agent) {
 		agents.add(agent);
+	}
+	
+	public void addRoundFinishedListener(final RoundFinishedListener rfl) {
+		this.roundFinishedListeners.add(rfl);
+	}
+	
+	public void addRunFinishedListener(final RunFinishedListener rfl) {
+		this.runFinishedListeners.add(rfl);
 	}
 	
 	/**
@@ -104,7 +122,8 @@ public class MultiAgentSystem implements Serializable {
 			for(Agent agent : agents) {
 				agent.roundFinish();
 			}
-			recordAffinities();
+			for(RoundFinishedListener rfl : roundFinishedListeners)
+				rfl.roundFinished(this, round);
 //			updateGraphAffinities();
 			round++;
 		}
@@ -113,123 +132,49 @@ public class MultiAgentSystem implements Serializable {
 		for(Agent agent : agents) {
 			agent.takeDown();
 		}
+		for(RunFinishedListener rfl : runFinishedListeners)
+			rfl.runFinished(this);
 	}
 	
 	public void step() {
 		run(1);
 	}
 	
-//	public void initGraph() {
-//		for(Agent agent : agents) {
-//			graph.addNode(agent.toString());
-//		}
-//		
-////		for(Agent agent : agents) {
-////			for(Agent other : agents) {
-////				if(agent.toString().compareTo(other.toString()) > 0) {
-////					graph.addEdge(agent.toString(), other.toString());
-////				}
-////			}
-////		}
-//	}
-//	
-//	public void updateGraphAffinities() {
-//		for(Agent agent1 : agents) {
-//			for(Agent agent2 : agents) {
-//				if(agent1.toString().compareTo(agent2.toString()) > 0) {
-//					final double affin1 = agent1.affinities().getCount(agent2);
-//					final double affin2 = agent2.affinities().getCount(agent1);
-//					final double affin = 100*(affin1+affin2)/2.0;
-//					final Edge e = graph.addEdge(agent1.toString(), agent2.toString(), agent1.toString()+"__"+agent2.toString()+"__"+round);
-//					e.enter(round);
-//					e.exit(round+1);
-//					e.setStaticAttribute("weight", String.valueOf(affin));
-////					graph.getEdge(agent1.toString(), agent2.toString()).enterDynamicAttributeValue("weight", String.valueOf(affin), round);
-////					graph.getEdge(agent1.toString(), agent2.toString()).exitDynamicAttributeValue("weight", String.valueOf(affin), round+1);
-//				}
-//			}
-//		}
-//	}
-//	private final StringBuilder affinities = new StringBuilder();
-	public void recordAffinities() {
-		final StringBuilder affinities_ = new StringBuilder();
-		final Agent[] agentsArr = agents.toArray(new Agent[0]);
-		Arrays.sort(agentsArr, new Comparator<Agent>(){
-			@Override
-			public int compare(Agent o1, Agent o2) {
-				return o1.toString().compareTo(o2.toString());
-			}
-		});
-		affinities_.append('\t');
-		for(int i = 0; i < agentsArr.length; i++) {
-			final Agent agent = agentsArr[i];
-			affinities_.append(agent);
-			if(i < agentsArr.length-1) affinities_.append('\t');
-		}
-		affinities_.append('\n');
+	public static class ResultDumper implements RunFinishedListener {
+		private final String outputFilename;
 		
-		for(Agent agentA : agentsArr) {
-			final Counter<Agent> affins = agentA.affinities();
-			affinities_.append(agentA);
-			affinities_.append('\t');
-			for(int i = 0; i < agentsArr.length; i++) {
-//			for(Agent agentB : agentsArr) {
-				final Agent agentB = agentsArr[i];
-				affinities_.append(affins.getCount(agentB));
-				if(i < agentsArr.length-1) affinities_.append('\t');
-			}
-			affinities_.append('\n');
+		public ResultDumper(String outputFilename) {
+			this.outputFilename = outputFilename;
 		}
-		if(affinitiesOutput != null) {
+		
+		@Override
+		public void runFinished(MultiAgentSystem sys) {
 			try {
-				affinitiesOutput.append(affinities_);
-				affinitiesOutput.flush();
-			} catch (IOException e) {
+				final BufferedWriter w = new BufferedWriter(new FileWriter(outputFilename));
+				for(Agent agent : sys.agents) {
+					w.append("Agent: " + agent);
+					w.newLine();
+					for(int i = 0; i < sys.round; i++) {
+						final Set<Artefact> all = new HashSet<Artefact>();
+						for(Agent other : sys.agents) {
+							if(agent != other) all.addAll(agent.artefacts(other));
+						}
+						for(Artefact a : all) {
+							w.append('\t');
+							w.append(String.valueOf(i));
+							w.append('\t');
+							w.append(a.toString());
+							w.newLine();
+						}
+					}
+				}
+				w.flush();
+				w.close();
+			} catch(IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
-//		affinities.append(affinities_);
-//		System.out.println(affinities_);
 	}
-	
-	public void dumpResult(final String filename) {
-		try {
-			final BufferedWriter w = new BufferedWriter(new FileWriter(filename));
-			for(Agent agent : agents) {
-				w.append("Agent: " + agent);
-				w.newLine();
-				for(int i = 0; i < round; i++) {
-					final Set<Artefact> all = new HashSet<Artefact>();
-					for(Agent other : agents) {
-						if(agent != other) all.addAll(agent.artefacts(other));
-					}
-					for(Artefact a : all) {
-						w.append('\t');
-						w.append(String.valueOf(i));
-						w.append('\t');
-						w.append(a.toString());
-						w.newLine();
-					}
-				}
-			}
-			w.flush();
-			w.close();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-//	public void dumpAffinities(final String filename) {
-//		try {
-//			final BufferedWriter w = new BufferedWriter(new FileWriter(filename));
-//			w.append(affinities);
-//			w.close();
-//		} catch(IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
-	
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		Util.initLogging();
@@ -237,46 +182,93 @@ public class MultiAgentSystem implements Serializable {
 		final String baseDir = System.getenv("HOME") + "/Courses/cs673";
 		final String outputDir = baseDir + "/cs673svn/output";
 		final ColorDB db = new ColorDB(baseDir + "/colors2.db");
-		
 		final MultiAgentSystem sys = MultiAgentSystem.instance();
-		final int agentCount = 10;
+		
+		//--------Settings----------
+		final int standardAgents = 20;
 		final int randomAgents = 0;
+		final int eccentricRaters = 0;
 		final double copycatWeight = 0.4;
+		final double exuberantWeight = 0.1;
+		final double randomRatingWeight = 0.2;
 		final int iterations = 100;
 		final int topAgentsToPickFrom = 100;
 		final int maxInitialArtefactsPerAgent = 40;
 		final int suckUpToThisManyAgents = 5;
 		final boolean orderArtefactsRandomly = true;
 		
+		//---------- Name of Experiment ----------
 		final StringBuilder name = new StringBuilder();
 		name.append("iterations");
 		name.append(iterations);
-		name.append("_agents");
-		name.append(agentCount);
-		name.append("_random");
-		name.append(randomAgents);
+		if(standardAgents > 0) {
+			name.append("_stdAgents");
+			name.append(standardAgents);
+		}
+		if(randomAgents > 0) {
+			name.append("_random");
+			name.append(randomAgents);
+		}
+		if(eccentricRaters > 0) {
+			name.append("_eccentric");
+			name.append(eccentricRaters);
+		}
 		name.append("_top");
 		name.append(topAgentsToPickFrom);
-		name.append("_maxartinit");
+		name.append("_maxArtInit");
 		name.append(maxInitialArtefactsPerAgent);
+		name.append("_cliquish");
+		name.append(suckUpToThisManyAgents);
 		if(copycatWeight > 0.0) {
 			name.append("_copycat");
 			name.append(copycatWeight);
 		}
-		if(orderArtefactsRandomly)
-			name.append("_artrandomorder");
-		name.append("_cliquish");
-		name.append(suckUpToThisManyAgents);
-//		name.append("_2");
+		if(exuberantWeight > 0.0) {
+			name.append("_exuberant");
+			name.append(exuberantWeight);
+		}
+		if(randomRatingWeight > 0.0) {
+			name.append("_randRating");
+			name.append(randomRatingWeight);
+		}
 		
+		
+		if(orderArtefactsRandomly)
+			name.append("_artRandOrder");
+		name.append("_multiStratAffinUpFact");
+		name.append("_2");
+		
+		//Begin constructing the agent factory
 		final ModularAgentFactory agentFact = new ModularAgentFactory(sys);
-//		agentFact.setPublicationDeciderFactory(Util.staticFactory(  (PublicationDecider)  new SycophanticPublicationDecider(suckUpToThisManyAgents)));
-		agentFact.setPublicationDeciderFactory(Util.staticFactory(  (PublicationDecider)  new CliqueishPublicationDecider(suckUpToThisManyAgents)));
-		agentFact.setPreferenceUpdaterFactory(Util.staticFactory(   (PreferenceUpdater)   new IndependentKDEPreferenceUpdater()));
+		
+		//---------Affinities--------
+		//Initializer:
+		agentFact.setAffinityInitializerFactory(RandomAffinityCombo.factory);
+		
+		//Updater:
+		final Counter<Factory<? extends AffinityUpdater>> affinUpFacts = new Counter<Factory<? extends AffinityUpdater>>();
+		affinUpFacts.setCount(NullAffinityCombo.factory, 1);
+		final Factory<ObsessiveAffinityCombo> obsessiveAffinFact = new SmartStaticFactory<ObsessiveAffinityCombo>() {
+			@Override
+			protected ObsessiveAffinityCombo instantiate_() {
+				return new ObsessiveAffinityCombo(0.1);
+			}
+		};
+		affinUpFacts.setCount(obsessiveAffinFact, 10);
+		affinUpFacts.setCount(IndifferentAffinityCombo.factory, 10);
+		affinUpFacts.setCount(RandomAffinityCombo.factory, 10);
+		affinUpFacts.setCount(AverageRatingAffinityUpdater.factory, 10);
+		affinUpFacts.normalize();
+//		final Factory<AffinityUpdater> affinUpFact = new GroupedFactory<AffinityUpdater>(affinUpFacts);
+//		agentFact.setAffinityUpdaterFactory(affinUpFact);
+		
+		final Factory<? extends AffinityUpdater> multiStratAffinUp = MultiStrategyAffinityUpdater.factory(affinUpFacts, 0.01);
+		agentFact.setAffinityUpdaterFactory(multiStratAffinUp);
+		
+//		agentFact.setPreferenceUpdaterFactory(Util.staticFactory(   (PreferenceUpdater)   new IndependentKDEPreferenceUpdater()));
+		agentFact.setPreferenceUpdaterFactory(Util.staticFactory( (PreferenceUpdater) new DependentWordsPreferenceUpdater(4)));
 		agentFact.setArtefactInitializerFactory(Util.staticFactory( (ArtefactInitializer) new RandomAgentArtefactInitializer(db, topAgentsToPickFrom, maxInitialArtefactsPerAgent, orderArtefactsRandomly)));
 		agentFact.setGenerationPlannerFactory(Util.staticFactory(   (GenerationPlanner)   new RandomGenerationPlanner(10)));
-		agentFact.setRatingGeneratorFactory(Util.staticFactory(     (RatingGenerator)     new EgocentricRatingGenerator()));
-		agentFact.setAffinityUpdaterFactory(Util.staticFactory(     (AffinityUpdater)     new AverageRatingAffinityUpdater()));
 		
 		if(copycatWeight > 0.0) {
 			final GroupedArtefactGenerator gag = new GroupedArtefactGenerator();
@@ -286,23 +278,42 @@ public class MultiAgentSystem implements Serializable {
 		} else {
 			agentFact.setArtefactGeneratorFactory(Util.staticFactory( (ArtefactGenerator) new SamplingArtefactGenerator()));
 		}
-		
-		for(int i = 0; i < agentCount-randomAgents; i++) {
-			sys.addAgent(agentFact.instantiate());
+		if(exuberantWeight > 0.0) {
+			final GroupedPublicationDecider gpd = new GroupedPublicationDecider();
+			gpd.addDecider(new CliqueishPublicationDecider(suckUpToThisManyAgents), 1.0-exuberantWeight);
+			gpd.addDecider(new ExuberantPublicationDecider(), exuberantWeight);
+			agentFact.setPublicationDeciderFactory(Util.staticFactory( (PublicationDecider) gpd));
+		} else {
+			agentFact.setPublicationDeciderFactory(Util.staticFactory(  (PublicationDecider)  new CliqueishPublicationDecider(suckUpToThisManyAgents)));
 		}
+		if(randomRatingWeight > 0.0) {
+			final GroupedRatingGenerator grg = new GroupedRatingGenerator();
+			grg.addGenerator(new EgocentricRatingGenerator(), 1.0-randomRatingWeight);
+			grg.addGenerator(new RandomRatingGenerator(), randomRatingWeight);
+			agentFact.setRatingGeneratorFactory(Util.staticFactory( (RatingGenerator) grg));
+		} else {
+			agentFact.setRatingGeneratorFactory(EgocentricRatingGenerator.factory);
+		}
+		
+		for(int i = 0; i < standardAgents; i++) {
+			sys.addAgent(agentFact.instantiate("agent"+i));
+		}
+		
+		
+		agentFact.setRatingGeneratorFactory(EccentricRatingGenerator.factory);
+		for(int i = 0; i < eccentricRaters; i++) {
+			sys.addAgent(agentFact.instantiate("eccentric"+i));
+		}
+		
 		for(int i = 0; i < randomAgents; i++) {
 			sys.addAgent(new RandomAgent(sys,"random"+i));
 		}
-//		sys.initGraph();
-		try {
-			sys.affinitiesOutput = new BufferedWriter(new FileWriter(outputDir + "/affinities/" + name + ".txt"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
+		sys.addRoundFinishedListener(new AffinitiesRecorder(outputDir + "/affinities/" + name + ".txt"));
+		sys.addRoundFinishedListener(new PublicationMatrixRecorder(outputDir + "/pubmatrix/" + name + ".txt"));
+		sys.addRunFinishedListener(new ResultDumper(outputDir+"/results/" + name + ".txt"));
 		sys.run(iterations);
-		sys.dumpResult(outputDir+"/results/" + name + ".txt");
 		
 		System.out.println("\nGenerated " + name);
-//		System.out.println(sys.graph.toGEXF());
 	}
 }

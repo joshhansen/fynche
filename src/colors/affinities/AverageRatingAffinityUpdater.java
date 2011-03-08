@@ -4,11 +4,19 @@ import java.util.Set;
 
 import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
+import colors.interfaces.Factory;
 import colors.interfaces.Rating;
 import colors.util.Counter;
+import colors.util.Util.SmartStaticFactory;
 
 public class AverageRatingAffinityUpdater implements AffinityUpdater {
-
+	public static final Factory<AverageRatingAffinityUpdater> factory = new SmartStaticFactory<AverageRatingAffinityUpdater>(){
+		@Override
+		protected AverageRatingAffinityUpdater instantiate_() {
+			return new AverageRatingAffinityUpdater();
+		}
+	};
+	
 	@Override
 	public Counter<Agent> newAffinities(Agent rater) {
 		final Set<Rating> ratings = rater.ratings();
