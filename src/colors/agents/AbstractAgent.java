@@ -46,11 +46,11 @@ public abstract class AbstractAgent implements Agent {
 	public Set<Artefact> artefacts() {
 		return artefacts.all();
 	}
-//
-//	@Override
-//	public Set<Artefact> publishedArtefacts(int roundNum) {
-//		return publishedArtefacts.partition(roundNum);
-//	}
+
+        @Override
+        public Set<Artefact> artefacts(final int roundNum) {
+            return artefacts.partition(roundNum);
+        }
 	
 	@Override
 	public Set<Artefact> artefacts(Agent inquirer) {

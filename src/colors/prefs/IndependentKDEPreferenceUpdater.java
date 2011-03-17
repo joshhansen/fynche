@@ -11,6 +11,7 @@ import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.PreferenceModel;
 import colors.interfaces.PreferenceUpdater;
+import colors.interfaces.Sampleable;
 import colors.util.Counter;
 import colors.util.SampleableKernelEstimator;
 
@@ -75,10 +76,6 @@ public class IndependentKDEPreferenceUpdater implements PreferenceUpdater {
 		}
 	}
 
-	public interface Sampleable<S> {
-		public S sample();
-	}
-	
 	@Override
 	public PreferenceModel newPreferences(Agent agentA, Agent agentB) {
 		final SampleableKernelEstimator r = new SampleableKernelEstimator(1);

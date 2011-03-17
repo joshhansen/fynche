@@ -3,6 +3,7 @@ package colors.agents;
 import java.util.logging.Logger;
 
 import colors.MultiAgentSystem;
+import colors.artefacts.generators.SamplingArtefactGenerator.NoSampleableModelException;
 import colors.exceptions.ArtefactGenerationException;
 import colors.interfaces.AffinityInitializer;
 import colors.interfaces.AffinityUpdater;
@@ -91,8 +92,11 @@ public class ModularAgent extends AbstractAgent {
 						publishedArtefacts.get(other).add(a, sys.round());
 				}
 				logger.fine(msg.toString());
+			} catch(NoSampleableModelException e) {
+				if(sys.round() > 0)//It's normal to not find a sampleable model on the first round, so only worry about it later
+					logger.severe("Error generating artefact: " + e.getMessage());
 			} catch(ArtefactGenerationException e) {
-				logger.warning("Error generating artefact: " + e.getMessage());
+				logger.severe("Error generating artefact: " + e.getMessage());
 			}
 		}
 	}

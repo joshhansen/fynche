@@ -57,6 +57,7 @@ public class Counter<T> {
 	 * This is O(n). There's got to be a faster way.
 	 */
 	public T sample() {
+		if(counts.isEmpty()) throw new IllegalArgumentException("Counter must have counts in order to be sampled.");
 		final double total = totalCount();
 		final double position = Rand.nextDouble();
 		double sum = 0.0;

@@ -1,9 +1,5 @@
 package colors.util;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.MessageFormat;
-import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -77,6 +73,10 @@ public class SimplerFormatter extends Formatter {
 	    		return 3;
 	    	else if(level.equals(Level.WARNING))
 	    		return 0;
+	    	else if(level.equals(Level.SEVERE))
+	    		return 0;
+                else if(level.equals(Level.CONFIG))
+                        return 0;
 	    	throw new IllegalArgumentException("Don't recognize level " + level);
 	    }
 	}

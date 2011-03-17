@@ -11,6 +11,7 @@ import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.PreferenceModel;
 import colors.interfaces.PreferenceUpdater;
+import colors.interfaces.Sampleable;
 import colors.util.Counter;
 import colors.util.CounterMap;
 import colors.util.SampleableKernelEstimator;
@@ -47,14 +48,14 @@ public class DependentWordsPreferenceUpdater implements PreferenceUpdater {
 		return key.toString();
 	}
 	
-	private class KDEColorModel implements PreferenceModel, Sampleable<NamedColor> {
+	public class DependentWordsPreferenceModel implements PreferenceModel, Sampleable<NamedColor> {
 		private final SampleableKernelEstimator r;
 		private final SampleableKernelEstimator g;
 		private final SampleableKernelEstimator b;
 		private final CounterMap<String,String> words;
 		private final CounterMap<String,Integer> tokenCount;
 
-		private KDEColorModel(SampleableKernelEstimator r, SampleableKernelEstimator g,
+		private DependentWordsPreferenceModel(SampleableKernelEstimator r, SampleableKernelEstimator g,
 				SampleableKernelEstimator b, CounterMap<String,String> words, CounterMap<String,Integer> tokenCount) {
 			this.r = r;
 			this.g = g;
@@ -80,29 +81,28 @@ public class DependentWordsPreferenceUpdater implements PreferenceUpdater {
 				return Math.exp(log_prob_r+log_prob_g+log_prob_b+log_prob_w);
 			} else throw new IllegalArgumentException();
 		}
-
+		
 		@Override
 		public NamedColor sample() {
-			final int r_ = r.sample(0, 255, 1).intValue();
-			final int g_ = g.sample(0, 255, 1).intValue();
-			final int b_ = b.sample(0, 255, 1).intValue();
-			
-			final String subdivKey = key(r_, g_, b_);
-			final Counter<String> subdivWords = words.getCounter(subdivKey);
-			
-			StringBuilder name = new StringBuilder();
-			
-			final int length = tokenCount.getCounter(subdivKey).sample();
-			for(int i = 0; i < length; i++) {
-				name.append(subdivWords.sample());
-				name.append(' ');
+			while(true) {
+				final int r_ = r.sample(0, 255, 1).intValue();
+				final int g_ = g.sample(0, 255, 1).intValue();
+				final int b_ = b.sample(0, 255, 1).intValue();
+				
+				final String subdivKey = key(r_, g_, b_);
+				final Counter<String> subdivWords = words.getCounter(subdivKey);
+				if(!subdivWords.isEmpty()) {
+					StringBuilder name = new StringBuilder();
+					
+					final int length = tokenCount.getCounter(subdivKey).sample();
+					for(int i = 0; i < length; i++) {
+						name.append(subdivWords.sample());
+						name.append(' ');
+					}
+					return new NamedColor(r_, g_, b_, name.toString().trim());
+				}
 			}
-			return new NamedColor(r_, g_, b_, name.toString().trim());
 		}
-	}
-
-	public interface Sampleable<S> {
-		public S sample();
 	}
 	
 	@Override
@@ -129,7 +129,7 @@ public class DependentWordsPreferenceUpdater implements PreferenceUpdater {
 		}
 		words.normalize();
 		
-		final KDEColorModel model = new KDEColorModel(r, g, b, words, tokenCounts);
+		final DependentWordsPreferenceModel model = new DependentWordsPreferenceModel(r, g, b, words, tokenCounts);
 //		System.out.println("sample: " + model.sample());
 		return model;
 	}

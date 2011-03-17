@@ -7,7 +7,7 @@ import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.ArtefactGenerator;
 import colors.interfaces.PreferenceModel;
-import colors.prefs.IndependentKDEPreferenceUpdater.Sampleable;
+import colors.interfaces.Sampleable;
 import colors.util.Counter;
 
 /**

@@ -60,7 +60,9 @@ public interface Agent extends Serializable {
 	 * in round <code>roundNum</code>.
 	 */
 	public Set<Artefact> artefacts(final Agent inquirer, final int roundNum);
-	
+
+        public Set<Artefact> artefacts(final int roundNum);
+
 	public Set<Rating> ratings();
 	
 	public Set<Rating> ratings(final int roundNum);
