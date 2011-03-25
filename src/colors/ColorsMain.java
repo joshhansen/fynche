@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 
 import colors.affinities.AverageRatingAffinityUpdater;
 import colors.affinities.IndifferentAffinityCombo;
+import colors.affinities.ModerateEntropyAffinityUpdater;
 import colors.affinities.MultiStrategyAffinityUpdater;
 import colors.affinities.NullAffinityCombo;
 import colors.affinities.ObsessiveAffinityCombo;
@@ -143,20 +144,21 @@ public class ColorsMain {
 	}
 	
 	private Factory<? extends AffinityUpdater> standardAffinUpFact() {
-		final Counter<Factory<? extends AffinityUpdater>> affinUpFacts = new Counter<Factory<? extends AffinityUpdater>>();
-		affinUpFacts.setCount(NullAffinityCombo.factory, 1);
-		final Factory<ObsessiveAffinityCombo> obsessiveAffinFact = new SmartStaticFactory<ObsessiveAffinityCombo>() {
-			@Override
-			protected ObsessiveAffinityCombo instantiate_() {
-				return new ObsessiveAffinityCombo(0.1);
-			}
-		};
-		affinUpFacts.setCount(obsessiveAffinFact, 10);
-		affinUpFacts.setCount(IndifferentAffinityCombo.factory, 10);
-		affinUpFacts.setCount(RandomAffinityCombo.factory, 10);
-		affinUpFacts.setCount(AverageRatingAffinityUpdater.factory, 10);
-		affinUpFacts.normalize();
-		return new GroupedFactory<AffinityUpdater>(affinUpFacts);
+//		final Counter<Factory<? extends AffinityUpdater>> affinUpFacts = new Counter<Factory<? extends AffinityUpdater>>();
+//		affinUpFacts.setCount(NullAffinityCombo.factory, 1);
+//		final Factory<ObsessiveAffinityCombo> obsessiveAffinFact = new SmartStaticFactory<ObsessiveAffinityCombo>() {
+//			@Override
+//			protected ObsessiveAffinityCombo instantiate_() {
+//				return new ObsessiveAffinityCombo(0.1);
+//			}
+//		};
+//		affinUpFacts.setCount(obsessiveAffinFact, 10);
+//		affinUpFacts.setCount(IndifferentAffinityCombo.factory, 10);
+//		affinUpFacts.setCount(RandomAffinityCombo.factory, 10);
+//		affinUpFacts.setCount(AverageRatingAffinityUpdater.factory, 10);
+//		affinUpFacts.normalize();
+//		return new GroupedFactory<AffinityUpdater>(affinUpFacts);
+		return Util.staticFactory((AffinityUpdater) new ModerateEntropyAffinityUpdater(1.5, 0.01));
 	}
 	
 	private ModularAgentFactory randomAgentFact() {
@@ -261,6 +263,7 @@ public class ColorsMain {
 			name.append("_artRandOrder");
 //		name.append("_multiStratAffinUpFact");
 //		name.append("_2");
+		name.append("_moderateEntropy3");
 		
 		return name.toString();
 	}
@@ -342,24 +345,21 @@ public class ColorsMain {
 		main.run();
 		
 		final ColorViewer viewer = new ColorViewer();
-		
-		for(Agent agent : main.sys.agents()) {
-                        for(int i = main.iterations - 30; i < main.iterations; i++) {
-                            for(Artefact a : agent.artefacts(i)) {
-                                if(a instanceof NamedColor)
-                                    viewer.addColor(agent.toString(), (NamedColor)a);
-                            }
-                        }
-//			for(Artefact a : agent.artefacts(main.iterations-1)) {
-//				if(a instanceof NamedColor)
-//					viewer.addColor(agent.toString(), (NamedColor)a);
-//			}
+		viewer.setTitle(main.runIdentifier());
+		for (Agent agent : main.sys.agents()) {
+			for (int i = main.iterations - 30; i < main.iterations; i++) {
+				for (Artefact a : agent.artefacts(i)) {
+					if (a instanceof NamedColor)
+						viewer.addColor(agent.toString(), (NamedColor) a);
+				}
+			}
 		}
 
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        viewer.setVisible(true);
-                    }
-                });
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				viewer.setVisible(true);
+			}
+		});
 	}
 }

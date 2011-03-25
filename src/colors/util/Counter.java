@@ -9,6 +9,15 @@ import java.util.Map.Entry;
 public class Counter<T> {
 	private Map<T,Double> counts = new HashMap<T,Double>();
 	
+	public Counter() {
+		//do nothing
+	}
+	
+	public Counter(final Counter<T> copyMe) {
+		for(Entry<T,Double> entry : copyMe.entrySet())
+			counts.put(entry.getKey(), entry.getValue());
+	}
+	
 	public void increment(T item) {
 		increment(item, 1.0);
 	}
