@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import colors.interfaces.AffinityUpdater;
 import colors.interfaces.Agent;
 import colors.util.Counter;
+import colors.util.Rand;
 
 public class ModerateEntropyAffinityUpdater implements AffinityUpdater {
 	private final double offset;
@@ -22,24 +23,27 @@ public class ModerateEntropyAffinityUpdater implements AffinityUpdater {
 	
 	private Counter<Agent> followPartialDerivatives(final Agent me) {
 		final Counter<Agent> currentAffins = new Counter<Agent>(me.affinities());
-		for(Entry<Agent,Double> entry : currentAffins.entrySet()) {
-			final Agent other = entry.getKey();
+		final Agent[] otherAgents = currentAffins.keySet().toArray(new Agent[0]);
+		final Agent other = otherAgents[Rand.nextInt(otherAgents.length)];
+		final double originalCount = currentAffins.getCount(other);
+//		for(Entry<Agent,Double> entry : currentAffins.entrySet()) {
+//			final Agent other = entry.getKey();
 			assert(other != me);
-			final double originalCount = entry.getValue().doubleValue();
+//			final double originalCount = entry.getValue().doubleValue();
 			final double partialDerivative = partialDerivative(currentAffins, other);
 			final double delta = partialDerivative * stepSize;
 			
 			final double newCount = Math.max(0.0, originalCount+delta);
 			assert(!Double.isNaN(newCount));
 			currentAffins.setCount(other, newCount);
-		}
+//		}
 		return currentAffins;
 	}
 	
 	private double partialDerivative(final Counter<Agent> affins, final Agent withRespectToThisAgent) {
 		final double log = smartLog(affins.getCount(withRespectToThisAgent));
 		final double otherAgentCount = affins.keySet().size();
-		final double firstTerm = 2.0 / otherAgentCount;
+		final double firstTerm = -2.0 / otherAgentCount;
 		final double secondTerm = log + 1.0;
 		final double thirdTerm = (offset * otherAgentCount) + entropy(affins);
 		final double partialDerivative = firstTerm * secondTerm * thirdTerm;

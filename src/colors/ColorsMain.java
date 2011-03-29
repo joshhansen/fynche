@@ -1,6 +1,12 @@
 package colors;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import colors.affinities.AverageRatingAffinityUpdater;
 import colors.affinities.IndifferentAffinityCombo;
@@ -53,8 +59,51 @@ public class ColorsMain {
 	
 	private final String outputDir;
 	
-	private double copycatWeight = 0.4;
-	private double exuberantWeight = 0.1;
+	private static class NoSuchPropException extends Exception {
+		public NoSuchPropException(String message) {
+			super(message);
+		}
+	}
+	
+	private final Properties props = new Properties();
+	private void setProp(final String propName, final Object value) {
+		props.put(propName, value);
+	}
+	
+	private String getPropS(final String propName) throws NoSuchPropException {
+		final Object val = props.get(propName);
+		if(val == null) throw new NoSuchPropException("Property '" + propName + "' not found.");
+		if(!(val instanceof String)) throw new NoSuchPropException("Property '" + propName + "' is not a string.");
+		return (String) val;
+	}
+	
+	private int getPropI(final String propName) throws NoSuchPropException {
+		final Object val = props.get(propName);
+		if(val == null) throw new NoSuchPropException("Property '" + propName + "' not found.");
+		if(!(val instanceof Integer)) throw new NoSuchPropException("Property '" + propName + "' is not an integer.");
+		return ((Integer)val).intValue();
+	}
+	
+	private boolean getPropB(final String propName) throws NoSuchPropException {
+		final Object val = props.get(propName);
+		if(val == null) throw new NoSuchPropException("Property '" + propName + "' not found.");
+		if(!(val instanceof Boolean)) throw new NoSuchPropException("Property '" + propName + "' is not a boolean.");
+		return ((Boolean) val).booleanValue();
+	}
+	
+	private double getPropD(final String propName) throws NoSuchPropException {
+		final Object val = props.get(propName);
+		if(val == null) throw new NoSuchPropException("Property '" + propName + "' not found.");
+		if(!(val instanceof Double)) throw new NoSuchPropException("Property '" + propName + "' is not a double.");
+		return ((Double)val).doubleValue();
+	}
+//	private final Map<String,String> propsS = new HashMap<String,String>();
+//	private final Map<String,Double> propsD = new HashMap<String,Double>();
+//	private final Map<String,Boolean> propsB = new HashMap<String,Boolean>();
+//	private final Map<String,Integer> propsI = new HashMap<String,Integer>();
+
+//	private double copycatWeight = 0.4;
+//	private double exuberantWeight = 0.1;
 	private double randomRatingWeight = 0.2;
 	private int iterations = 100;
 	private int topAgentsToPickFrom = 100;
@@ -65,6 +114,7 @@ public class ColorsMain {
 	private final ColorDB db;
 	private final MultiAgentSystem sys;
 	private final Counter<AgentType> agentTypeCounts = new Counter<AgentType>();
+//	private final Properties props = new Properties();
 	
 	public ColorsMain() {
 		final String baseDir = System.getenv("HOME") + "/Courses/cs673";
@@ -75,13 +125,12 @@ public class ColorsMain {
 		this.outputDir = outputDir;
 	}
 	
-	public ColorsMain(double copycatWeight, double exuberantWeight,
-			double randomRatingWeight, int iterations, int topAgentsToPickFrom,
+	public ColorsMain(double randomRatingWeight, int iterations, int topAgentsToPickFrom,
 			int maxInitialArtefactsPerAgent, int suckUpToThisManyAgents,
 			boolean orderArtefactsRandomly) {
 		this();
-		this.copycatWeight = copycatWeight;
-		this.exuberantWeight = exuberantWeight;
+//		this.copycatWeight = copycatWeight;
+//		this.exuberantWeight = exuberantWeight;
 		this.randomRatingWeight = randomRatingWeight;
 		this.iterations = iterations;
 		this.topAgentsToPickFrom = topAgentsToPickFrom;
@@ -122,23 +171,27 @@ public class ColorsMain {
 	}
 	
 	private Factory<? extends PublicationDecider> standardPubDecFact() {
-		if(exuberantWeight > 0.0) {
+		try {
+			final double exuberantWeight = getPropD(Props.PUBDEC_EXUBERANT_WEIGHT);
+			assert(exuberantWeight > 0.0);
 			final GroupedPublicationDecider gpd = new GroupedPublicationDecider();
 			gpd.addDecider(new CliqueishPublicationDecider(suckUpToThisManyAgents), 1.0-exuberantWeight);
 			gpd.addDecider(new ExuberantPublicationDecider(), exuberantWeight);
 			return Util.staticFactory( (PublicationDecider) gpd);
-		} else {
+		} catch(NoSuchPropException e) {
 			return Util.staticFactory(  (PublicationDecider)  new CliqueishPublicationDecider(suckUpToThisManyAgents));
 		}
 	}
 	
 	private Factory<? extends ArtefactGenerator> standardArtGenFact() {
-		if(copycatWeight > 0.0) {
+		try {
+			final double copycatWeight = getPropD(Props.ARTGEN_COPYCAT_WEIGHT);
+			assert(copycatWeight > 0.0);
 			final GroupedArtefactGenerator gag = new GroupedArtefactGenerator();
 			gag.addGenerator(new SamplingArtefactGenerator(), 1.0-copycatWeight);
 			gag.addGenerator(new CopycatArtefactGenerator(), copycatWeight);
 			return Util.staticFactory( (ArtefactGenerator) gag);
-		} else {
+		} catch(NoSuchPropException e) {
 			return Util.staticFactory( (ArtefactGenerator) new SamplingArtefactGenerator());
 		}
 	}
@@ -158,7 +211,15 @@ public class ColorsMain {
 //		affinUpFacts.setCount(AverageRatingAffinityUpdater.factory, 10);
 //		affinUpFacts.normalize();
 //		return new GroupedFactory<AffinityUpdater>(affinUpFacts);
-		return Util.staticFactory((AffinityUpdater) new ModerateEntropyAffinityUpdater(1.5, 0.01));
+		
+		try {
+			final double offset = getPropD(Props.MOD_ENT_OFFSET);
+			final double stepSize = getPropD(Props.STEP_SIZE);
+			return Util.staticFactory((AffinityUpdater) new ModerateEntropyAffinityUpdater(offset, stepSize));
+		} catch(NoSuchPropException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	private ModularAgentFactory randomAgentFact() {
@@ -245,14 +306,14 @@ public class ColorsMain {
 		name.append(maxInitialArtefactsPerAgent);
 		name.append("_cliquish");
 		name.append(suckUpToThisManyAgents);
-		if(copycatWeight > 0.0) {
-			name.append("_copycat");
-			name.append(copycatWeight);
-		}
-		if(exuberantWeight > 0.0) {
-			name.append("_exuberant");
-			name.append(exuberantWeight);
-		}
+//		if(copycatWeight > 0.0) {
+//			name.append("_copycat");
+//			name.append(copycatWeight);
+//		}
+//		if(exuberantWeight > 0.0) {
+//			name.append("_exuberant");
+//			name.append(exuberantWeight);
+//		}
 		if(randomRatingWeight > 0.0) {
 			name.append("_randRating");
 			name.append(randomRatingWeight);
@@ -263,7 +324,23 @@ public class ColorsMain {
 			name.append("_artRandOrder");
 //		name.append("_multiStratAffinUpFact");
 //		name.append("_2");
-		name.append("_moderateEntropy3");
+		
+		for(final Entry<Object,Object> entry : props.entrySet()) {
+			final String propName = entry.getKey().toString();
+			name.append('_');
+			
+			final Object val = entry.getValue();
+			if(val instanceof String || val instanceof Double || val instanceof Integer) {
+				name.append(propName);
+				name.append(':');
+				name.append(val.toString());
+			} else if(val instanceof Boolean) {
+				if(((Boolean)val).booleanValue())
+					name.append(propName);
+			}
+		}
+		
+		name.append("_moderateEntropy");
 		
 		return name.toString();
 	}
@@ -279,8 +356,10 @@ public class ColorsMain {
 	}
 	
 	public void run() {
+		
 		Util.initLogging();
 		final String runID = runIdentifier();
+		saveProps(outputDir + "/props/" + runID + ".properties");
 		sys.addRoundFinishedListener(new AffinitiesRecorder(outputDir + "/affinities/" + runID + ".txt"));
 		sys.addRoundFinishedListener(new PublicationMatrixRecorder(outputDir + "/pubmatrix/" + runID + ".txt"));
 		sys.addRunFinishedListener(new ResultDumper(outputDir+"/results/" + runID + ".txt"));
@@ -289,15 +368,31 @@ public class ColorsMain {
 		System.out.println("\nGenerated " + runIdentifier());
 	}
 	
-	
-	
-	public void setCopycatWeight(double copycatWeight) {
-		this.copycatWeight = copycatWeight;
+	private void saveProps(final String toFile) {
+		try {
+			final BufferedWriter w = new BufferedWriter(new FileWriter(toFile));
+			for(Entry<Object,Object> entry : props.entrySet()) {
+				w.append(entry.getKey().toString());
+				w.append(':');
+				w.append(entry.getValue().toString());
+				w.newLine();
+			}
+			w.flush();
+			w.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
+	
+	
+	
+//	public void setCopycatWeight(double copycatWeight) {
+//		this.copycatWeight = copycatWeight;
+//	}
 
-	public void setExuberantWeight(double exuberantWeight) {
-		this.exuberantWeight = exuberantWeight;
-	}
+//	public void setExuberantWeight(double exuberantWeight) {
+//		this.exuberantWeight = exuberantWeight;
+//	}
 
 	public void setRandomRatingWeight(double randomRatingWeight) {
 		this.randomRatingWeight = randomRatingWeight;
@@ -322,8 +417,8 @@ public class ColorsMain {
 	public void setOrderArtefactsRandomly(boolean orderArtefactsRandomly) {
 		this.orderArtefactsRandomly = orderArtefactsRandomly;
 	}
-
-//	double copycatWeight, double exuberantWeight,
+	
+	//	double copycatWeight, double exuberantWeight,
 //	double randomRatingWeight, int iterations, int topAgentsToPickFrom,
 //	int maxInitialArtefactsPerAgent, int suckUpToThisManyAgents,
 //	boolean orderArtefactsRandomly)
@@ -331,14 +426,17 @@ public class ColorsMain {
 //		final ColorsMain main = new ColorsMain(0, 0, 0, 100, 100, 1000, 5, true);
 		final ColorsMain main = new ColorsMain();
 		
-		main.setCopycatWeight(0);
-		main.setExuberantWeight(0);
+		main.setProp(Props.ARTGEN_COPYCAT_WEIGHT, 0.1);
+//		main.setProp(Props.PUBDEC_EXUBERANT_WEIGHT, 0.0);
 		main.setRandomRatingWeight(0);
 		main.setIterations(100);
-		main.setTopAgentsToPickFrom(100);
+		main.setTopAgentsToPickFrom(10);
 		main.setMaxInitialArtefactsPerAgent(5000);
 		main.setSuckUpToThisManyAgents(5);
 		main.setOrderArtefactsRandomly(true);
+		
+		main.setProp(Props.STEP_SIZE, 0.01);
+		main.setProp(Props.MOD_ENT_OFFSET, 3.0);
 		
 		main.setAgentCount(AgentType.STANDARD, 10);
 		main.addAgents();
