@@ -16,13 +16,13 @@ public class IndifferentAffinityCombo implements AffinityCombo {
 
 	@Override
 	public Counter<Agent> initialAffinities(Agent agent) {
+		final double affin = 1.0 / (double)(agent.system().agents().size() - 1);
 		final Counter<Agent> affins = new Counter<Agent>();
 		for(Agent other : agent.system().agents()) {
 			if(other != agent) {
-				affins.increment(other);
+				affins.setCount(other, affin);
 			}
 		}
-		affins.normalize();
 		return affins;
 	}
 

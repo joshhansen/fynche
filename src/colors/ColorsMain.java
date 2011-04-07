@@ -41,6 +41,11 @@ import colors.ratings.EccentricRatingGenerator;
 import colors.ratings.EgocentricRatingGenerator;
 import colors.ratings.GroupedRatingGenerator;
 import colors.ratings.RandomRatingGenerator;
+import colors.sys.AffinitiesGraphRecorder;
+import colors.sys.AffinitiesRecorder;
+import colors.sys.MultiAgentSystem;
+import colors.sys.PublicationMatrixRecorder;
+import colors.sys.ResultDumper;
 import colors.ui.ColorViewer;
 import colors.util.Counter;
 import colors.util.GroupedFactory;
@@ -86,7 +91,8 @@ public class ColorsMain {
 	private ModularAgentFactory standardAgentFact() {
 		final ModularAgentFactory maf = new ModularAgentFactory(sys);
 		
-		maf.setAffinityInitializerFactory(RandomAffinityCombo.factory);
+//		maf.setAffinityInitializerFactory(RandomAffinityCombo.factory);
+		maf.setAffinityInitializerFactory(IndifferentAffinityCombo.factory);
 //		maf(Util.staticFactory(   (PreferenceUpdater)   new IndependentKDEPreferenceUpdater()));
 		maf.setPreferenceUpdaterFactory(Util.staticFactory( (PreferenceUpdater) new DependentWordsPreferenceUpdater(4)));
 		maf.setArtefactInitializerFactory(Util.staticFactory( (ArtefactInitializer) new RandomAgentArtefactInitializer(db, props.getPropI(Props.TOP_AGENTS_TO_PICK_FROM), props.getPropI(Props.MAX_INITIAL_ARTEFACTS_PER_AGENT), props.getPropB(Props.ORDER_ARTEFACTS_RANDOMLY))));
@@ -242,7 +248,7 @@ public class ColorsMain {
 			}
 		}
 		
-		name.append("_moderateEntropy");
+		name.append("_moderateEntropy_uniformAffinInit4");
 		
 		return name.toString();
 	}
@@ -261,9 +267,13 @@ public class ColorsMain {
 		Util.initLogging();
 		final String runID = runIdentifier();
 		saveProps(outputDir + "/props/" + runID + ".properties");
-		sys.addRoundFinishedListener(new AffinitiesRecorder(outputDir + "/affinities/" + runID + ".txt"));
-		sys.addRoundFinishedListener(new PublicationMatrixRecorder(outputDir + "/pubmatrix/" + runID + ".txt"));
-		sys.addRunFinishedListener(new ResultDumper(outputDir+"/results/" + runID + ".txt"));
+		sys.addListener(new AffinitiesRecorder(outputDir + "/affinities/" + runID + ".txt"));
+		sys.addListener(new PublicationMatrixRecorder(outputDir + "/pubmatrix/" + runID + ".txt"));
+		sys.addListener(new ResultDumper(outputDir+"/results/" + runID + ".txt"));
+		
+		final String affinitiesGraphFilename = outputDir + "/gexf/" + runID + ".gexf";
+		final AffinitiesGraphRecorder agr = new AffinitiesGraphRecorder(sys, affinitiesGraphFilename);
+		sys.addListener(agr);
 		
 		sys.run(iterations);
 		System.out.println("\nGenerated " + runIdentifier());
@@ -297,7 +307,7 @@ public class ColorsMain {
 		final ColorsMain main = new ColorsMain();
 		
 		main.setIterations(100);
-		main.setProp(Props.ARTGEN_COPYCAT_WEIGHT, 0.1);
+		main.setProp(Props.ARTGEN_COPYCAT_WEIGHT, 0.01);
 //		main.setProp(Props.PUBDEC_EXUBERANT_WEIGHT, 0.1);
 //		main.setProp(RANDOM_RATING_WEIGHT, 0.2);
 		
@@ -305,13 +315,17 @@ public class ColorsMain {
 		main.setProp(Props.MAX_INITIAL_ARTEFACTS_PER_AGENT, 5000);
 		main.setProp(Props.SUCK_UP_TO_THIS_MANY_AGENTS, 5);
 		main.setProp(Props.ORDER_ARTEFACTS_RANDOMLY, true);
-		main.setProp(Props.STEP_SIZE, 0.05);
-		main.setProp(Props.MOD_ENT_OFFSET, 3.0);
+		main.setProp(Props.STEP_SIZE, 0.03);
+		main.setProp(Props.MOD_ENT_OFFSET, 0.5);
 		
 		main.setAgentCount(AgentType.STANDARD, 10);
 		main.addAgents();
 		main.run();
 		
+//		 showViewer(main);
+	}
+
+	private static void showViewer(final ColorsMain main) {
 		final ColorViewer viewer = new ColorViewer();
 		viewer.setTitle(main.runIdentifier());
 		for (Agent agent : main.sys.agents()) {

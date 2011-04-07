@@ -1,5 +1,6 @@
 package colors;
 
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -15,6 +16,10 @@ public class BetterProperties {
 	
 	public void setProp(final String propName, final Object value) {
 		props.put(propName, value);
+	}
+	
+	public Object getProp(final String propName) {
+		return props.get(propName);
 	}
 	
 	public String getPropS(final String propName) {
@@ -48,4 +53,14 @@ public class BetterProperties {
 	public Set<Entry<Object, Object>> entrySet() {
 		return props.entrySet();
 	}
+
+	public Set<String> keySet() {
+		return props.stringPropertyNames();
+	}
+
+	public Collection<Object> values() {
+		return props.values();
+	}
+	
+	
 }

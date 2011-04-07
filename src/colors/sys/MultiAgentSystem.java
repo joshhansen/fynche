@@ -1,4 +1,4 @@
-package colors;
+package colors.sys;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -21,8 +21,9 @@ public class MultiAgentSystem implements Serializable {
 	
 	
 	private int round = 0;
-	private Set<RoundFinishedListener> roundFinishedListeners = new HashSet<RoundFinishedListener>();
-	private Set<RunFinishedListener> runFinishedListeners = new HashSet<RunFinishedListener>();
+	private Set<SysListener> listeners = new HashSet<SysListener>();
+//	private Set<RoundListener> roundListeners = new HashSet<RoundListener>();
+//	private Set<RunListener> runListeners = new HashSet<RunListener>();
 	private MultiAgentSystem() {
 	}
 	
@@ -39,12 +40,16 @@ public class MultiAgentSystem implements Serializable {
 		agents.add(agent);
 	}
 	
-	public void addRoundFinishedListener(final RoundFinishedListener rfl) {
-		this.roundFinishedListeners.add(rfl);
-	}
+//	public void addRoundFinishedListener(final RoundListener rfl) {
+//		this.roundListeners.add(rfl);
+//	}
+//	
+//	public void addRunFinishedListener(final RunListener rfl) {
+//		this.runListeners.add(rfl);
+//	}
 	
-	public void addRunFinishedListener(final RunFinishedListener rfl) {
-		this.runFinishedListeners.add(rfl);
+	public void addListener(final SysListener sl) {
+		listeners.add(sl);
 	}
 	
 	/**
@@ -54,10 +59,13 @@ public class MultiAgentSystem implements Serializable {
 	public void run(final int iterations) {
 		logger.info("Going to run for " + iterations + " iterations");
 		logger.info("Setup");
+		fireSetupStarted();
 		for(Agent agent : agents) {
 			agent.setUp();
 		}
+		fireRunStarted();
 		for(int i = 0; i < iterations; i++) {
+			fireRoundStarted();
 			if(i % 10 == 0) System.out.print(" " + i);
 			else System.out.print('.');
 			
@@ -80,7 +88,6 @@ public class MultiAgentSystem implements Serializable {
 				agent.roundFinish();
 			}
 			fireRoundFinished();
-//			updateGraphAffinities();
 			round++;
 		}
 		
@@ -90,15 +97,31 @@ public class MultiAgentSystem implements Serializable {
 		}
 		fireRunFinished();
 	}
+	
+	private void fireSetupStarted() {
+		for(SysListener sl : listeners) {
+			sl.setupStarted(this);
+		}
+	}
+	
+	private void fireRoundStarted() {
+		for(SysListener sl : listeners)
+			sl.roundStarted(this, round);
+	}
 
 	private void fireRoundFinished() {
-		for(RoundFinishedListener rfl : roundFinishedListeners)
-			rfl.roundFinished(this, round);
+		for(SysListener sl : listeners)
+			sl.roundFinished(this, round);
+	}
+	
+	private void fireRunStarted() {
+		for(SysListener sl : listeners)
+			sl.runStarted(this);
 	}
 
 	private void fireRunFinished() {
-		for(RunFinishedListener rfl : runFinishedListeners)
-			rfl.runFinished(this);
+		for(SysListener sl : listeners)
+			sl.runFinished(this);
 	}
 	
 	public void step() {

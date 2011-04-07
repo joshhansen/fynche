@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import colors.MultiAgentSystem;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.PreferenceModel;
 import colors.interfaces.Rating;
+import colors.sys.MultiAgentSystem;
 import colors.util.Counter;
 import colors.util.PartitionedSet;
 

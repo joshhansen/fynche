@@ -26,6 +26,8 @@ public class CopycatArtefactGenerator implements ArtefactGenerator {
 		
 		if(affins.isEmpty())
 			throw new ArtefactGenerationException("No neighbors had sampleable preferences");
+		if(affins.totalCount() == 0.0)
+			throw new ArtefactGenerationException("Affinity towards all neighbors was zero");
 		
 		return (Artefact) affins.sample().sample();
 	}

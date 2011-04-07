@@ -489,7 +489,7 @@ public class DynamicGraph {
 		return node;
 	}
 	
-	private String edgeKey(final String node1ID, final String node2ID) {
+	public String edgeKey(final String node1ID, final String node2ID) {
 		String[] arr = new String[]{node1ID, node2ID};
 		if(directionality.equals(Directionality.UNDIRECTED))
 			Arrays.sort(arr);
@@ -503,7 +503,7 @@ public class DynamicGraph {
 	public Edge addEdge(final String node1ID, final String node2ID, final String edgeID) {
 		if(!nodes.containsKey(node1ID)) throw new IllegalArgumentException("Node with ID \"" + node1ID + "\" doesn't exist");
 		if(!nodes.containsKey(node2ID)) throw new IllegalArgumentException("Node with ID \"" + node2ID + "\" doesn't exist");
-		if(edges.containsKey(edgeID)) throw new IllegalArgumentException("Edge with endpoints \"" + node1ID + "\" and \"" + node2ID + "\" already exists");
+		if(edges.containsKey(edgeID)) throw new IllegalArgumentException("Edge with ID " + edgeID + " (endpoints \"" + node1ID + "\" and \"" + node2ID + "\") already exists");
 		final Edge edge = new Edge(String.valueOf(nextEdgeID++), node1ID, node2ID);
 		edges.put(edgeID, edge);
 		return edge;
@@ -514,7 +514,11 @@ public class DynamicGraph {
 	}
 	
 	public boolean containsEdge(final String node1ID, final String node2ID) {
-		return edges.containsKey(edgeKey(node1ID, node2ID));
+		return containsEdge(edgeKey(node1ID, node2ID));
+	}
+	
+	public boolean containsEdge(final String edgeID) {
+		return edges.containsKey(edgeID);
 	}
 	
 	public Set<Node> nodes() {

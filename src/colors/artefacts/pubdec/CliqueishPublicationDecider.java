@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import colors.MultiAgentSystem;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.PublicationDecider;
+import colors.sys.MultiAgentSystem;
 
 public class CliqueishPublicationDecider implements PublicationDecider {
 	private final int topN;

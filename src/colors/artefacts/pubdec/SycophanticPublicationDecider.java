@@ -3,12 +3,12 @@ package colors.artefacts.pubdec;
 import java.util.ArrayList;
 import java.util.List;
 
-import colors.MultiAgentSystem;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 import colors.interfaces.Factory;
 import colors.interfaces.PublicationDecider;
 import colors.interfaces.Rating;
+import colors.sys.MultiAgentSystem;
 import colors.util.Counter;
 import colors.util.Util.SmartStaticFactory;
 

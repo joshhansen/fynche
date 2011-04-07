@@ -57,7 +57,7 @@ public class Counter<T> {
 	public Counter<T> normalize() {
 		final double denom = totalCount();
 		for(T item : counts.keySet()) {
-			counts.put(item, counts.get(item)/denom);
+			counts.put(item, counts.get(item).doubleValue()/denom);
 		}
 		return this;
 	}

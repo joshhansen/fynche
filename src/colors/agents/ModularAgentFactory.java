@@ -1,6 +1,5 @@
 package colors.agents;
 
-import colors.MultiAgentSystem;
 import colors.affinities.NullAffinityCombo;
 import colors.affinities.RandomAffinityCombo;
 import colors.artefacts.generators.RandomNamedColorGenerator;
@@ -25,6 +24,7 @@ import colors.prefs.NullPreferenceCombo;
 import colors.prefs.RandomPreferenceInitializer;
 import colors.ratings.NullRatingCombo;
 import colors.ratings.RandomRatingGenerator;
+import colors.sys.MultiAgentSystem;
 import colors.util.Rand;
 
 public class ModularAgentFactory implements Factory<ModularAgent> {

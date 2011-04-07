@@ -1,7 +1,7 @@
 /**
  * 
  */
-package colors;
+package colors.sys;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -12,7 +12,7 @@ import java.util.Set;
 import colors.interfaces.Agent;
 import colors.interfaces.Artefact;
 
-public class ResultDumper implements RunFinishedListener {
+public class ResultDumper extends SysAdaptor {
 	private final String outputFilename;
 	
 	public ResultDumper(String outputFilename) {

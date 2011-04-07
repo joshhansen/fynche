@@ -43,7 +43,7 @@ public class ModerateEntropyAffinityUpdater implements AffinityUpdater {
 	private double partialDerivative(final Counter<Agent> affins, final Agent withRespectToThisAgent) {
 		final double log = smartLog(affins.getCount(withRespectToThisAgent));
 		final double otherAgentCount = affins.keySet().size();
-		final double firstTerm = -2.0 / otherAgentCount;
+		final double firstTerm = 2.0 / otherAgentCount;
 		final double secondTerm = log + 1.0;
 		final double thirdTerm = (offset * otherAgentCount) + entropy(affins);
 		final double partialDerivative = firstTerm * secondTerm * thirdTerm;

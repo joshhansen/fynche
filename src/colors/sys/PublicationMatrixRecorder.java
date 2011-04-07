@@ -1,4 +1,4 @@
-package colors;
+package colors.sys;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -9,7 +9,7 @@ import java.util.Comparator;
 
 import colors.interfaces.Agent;
 
-class PublicationMatrixRecorder implements RoundFinishedListener {
+public class PublicationMatrixRecorder extends SysAdaptor {
 	private final Writer pubMatrixOutput;
 	public PublicationMatrixRecorder(final String outputFilename) {
 		Writer output = null;
@@ -62,4 +62,6 @@ class PublicationMatrixRecorder implements RoundFinishedListener {
 			}
 		}
 	}
+	
+	
 }

@@ -2,7 +2,6 @@ package colors.agents;
 
 import java.util.logging.Logger;
 
-import colors.MultiAgentSystem;
 import colors.artefacts.generators.SamplingArtefactGenerator.NoSampleableModelException;
 import colors.exceptions.ArtefactGenerationException;
 import colors.interfaces.AffinityInitializer;
@@ -17,6 +16,7 @@ import colors.interfaces.PreferenceUpdater;
 import colors.interfaces.PublicationDecider;
 import colors.interfaces.RatingGenerator;
 import colors.interfaces.RatingInitializer;
+import colors.sys.MultiAgentSystem;
 
 public class ModularAgent extends AbstractAgent {
 	private static final long serialVersionUID = 1L;
