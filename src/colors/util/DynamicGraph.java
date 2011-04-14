@@ -3,13 +3,12 @@ package colors.util;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -36,7 +35,10 @@ public class DynamicGraph {
 		private final SortedSet<Transition> times = new TreeSet<Transition>(new Comparator<Transition>(){
 			@Override
 			public int compare(Transition o1, Transition o2) {
-				return o1.atTime.compareTo(o2.atTime);
+				if(o1.atTime == o2.atTime)
+					return o2.transitionType.compareTo(o1.transitionType);
+				else
+					return o1.atTime.compareTo(o2.atTime);
 			}
 		});
 		public void enter() {
@@ -44,6 +46,7 @@ public class DynamicGraph {
 		}
 		
 		public void enter(final int atTime) {
+			timeSeen(atTime);
 			times.add(new Transition(atTime, TransitionType.ENTER));
 		}
 		
@@ -52,6 +55,7 @@ public class DynamicGraph {
 		}
 		
 		public void exit(final int atTime) {
+			timeSeen(atTime);
 			times.add(new Transition(atTime, TransitionType.EXIT));
 		}
 		
@@ -133,7 +137,7 @@ public class DynamicGraph {
 		}
 	}
 	
-	private static class MutableInt {
+	public static class MutableInt {
 		private int value;
 		public MutableInt(final int value) {
 			this.value = value;
@@ -154,40 +158,107 @@ public class DynamicGraph {
 	
 
 	/** This helps us maintain a global list of attributes based on which ones are set at the node and edge level */
-	private  class SetUpdatingMap<K,V> extends HashMap<K,V> {
+//	private  class SetUpdatingMap<K,V> extends HashMap<K,V> {
+//		private final MutableInt nextID;
+//		private final Map<K,Integer> idMap;
+//		
+//		public SetUpdatingMap(Map<K,Integer> idMap, MutableInt nextID) {
+//			this.idMap = idMap;
+//			this.nextID = nextID;
+//		}
+//
+//		@Override
+//		public V put(K key, V value) {
+//			this.idMap.put(key, nextID.value());
+//			nextID.increment();
+//			return super.put(key, value);
+//		}
+//	}
+	
+	
+	
+	public class StaticAttributes {
 		private final MutableInt nextID;
-		private final Map<K,Integer> idMap;
+		private final Set<String> attrs;
+		private final Map<String,Integer> idMap;
+		private final Map<String,Object> map = new HashMap<String,Object>();
 		
-		public SetUpdatingMap(Map<K,Integer> idMap, MutableInt nextID) {
+		public StaticAttributes(final Set<String> attrs, final Map<String,Integer> idMap, final MutableInt nextID) {
+			this.attrs = attrs;
 			this.idMap = idMap;
 			this.nextID = nextID;
 		}
 
-		@Override
-		public V put(K key, V value) {
-			this.idMap.put(key, nextID.value());
-			nextID.increment();
-			return super.put(key, value);
+		public Object put(String attr, Object value) {
+			if(!(value instanceof String || value instanceof Double || value instanceof Integer || value instanceof Float || value instanceof Boolean || value instanceof Date))
+				throw new IllegalArgumentException("Type " + value.getClass().getSimpleName() + " not supported");
+			Class<?> cls = attributeTypes.get(attr);
+			if(cls == null) {
+				attributeTypes.put(attr, value.getClass());
+			} else {
+				if(!cls.equals(value.getClass())) throw new IllegalArgumentException("Type mismatch! Should be " + cls.getSimpleName() + " but was " + value.getClass().getSimpleName());
+			}
+			
+			attrs.add(attr);
+			
+			if(!idMap.containsKey(attr)) {
+				idMap.put(attr, nextID.value());
+				nextID.increment();
+			}
+			
+			return map.put(attr, value);
+		}
+
+		public Object get(Object key) {
+			return map.get(key);
+		}
+
+		public Set<String> keySet() {
+			return map.keySet();
+		}
+
+		public boolean isEmpty() {
+			return map.isEmpty();
+		}
+
+		public Set<Entry<String, Object>> entrySet() {
+			return map.entrySet();
 		}
 	}
 	
 	private class DynamicAttributes {
+		private final Set<String> attrs;
 		private final MutableInt nextID;
 		private final Map<String,Integer> idMap;
-		private final Map<String,Map<String,Times>> map = new HashMap<String,Map<String,Times>>();
+		private final Map<String,Map<Object,Times>> map = new HashMap<String,Map<Object,Times>>();
 		
-		public DynamicAttributes(Map<String,Integer> idMap, MutableInt nextID) {
+		public DynamicAttributes(final Set<String> attrs, final Map<String,Integer> idMap, final MutableInt nextID) {
+			this.attrs = attrs;
 			this.idMap = idMap;
 			this.nextID = nextID;
 		}
 		
-		public Times get(final String attr, final String value) {
-			idMap.put(attr, nextID.value());
-			nextID.increment();
+		public Times get(final String attr, final Object value) {
+			if(!(value instanceof String || value instanceof Double || value instanceof Integer || value instanceof Float || value instanceof Boolean || value instanceof Date))
+				throw new IllegalArgumentException("Type " + value.getClass().getSimpleName() + " not supported");
+			Class<?> cls = attributeTypes.get(attr);
+			if(cls == null) {
+				attributeTypes.put(attr, value.getClass());
+			} else {
+				if(!cls.equals(value.getClass())) throw new IllegalArgumentException("Type mismatch! Should be " + cls.getSimpleName() + " but was " + value.getClass().getSimpleName());
+			}
 			
-			Map<String,Times> submap = map.get(attr);
+			attrs.add(attr);
+			
+			
+			if(!idMap.containsKey(attr)) {
+				idMap.put(attr, nextID.value());
+				nextID.increment();
+			}
+			
+			Map<Object,Times> submap = map.get(attr);
 			if(submap == null) {
-				submap = new HashMap<String,Times>();
+				submap = new HashMap<Object,Times>();
 				map.put(attr, submap);
 			}
 			Times times = submap.get(value);
@@ -195,6 +266,7 @@ public class DynamicGraph {
 				times = new Times();
 				submap.put(value, times);
 			}
+			
 			return times;
 		}
 		
@@ -202,7 +274,7 @@ public class DynamicGraph {
 			return map.isEmpty();
 		}
 		
-		private String asAttValue(String attr, String value, Integer enter, Integer exit) {
+		private String asAttValue(String attr, Object value, Integer enter, Integer exit) {
 			final StringBuilder attValue = new StringBuilder();
 			attValue.append("\t\t\t\t\t<attvalue for=\"");
 			attValue.append(idMap.get(attr));
@@ -225,10 +297,10 @@ public class DynamicGraph {
 		
 		public String toGEXFAttValues() {
 			final StringBuilder gexf = new StringBuilder();
-			for(Entry<String,Map<String,Times>> entry : map.entrySet()) {
-				for(Entry<String,Times> subEntry : entry.getValue().entrySet()) {
+			for(Entry<String,Map<Object,Times>> entry : map.entrySet()) {
+				for(Entry<Object,Times> subEntry : entry.getValue().entrySet()) {
 					final String attr = entry.getKey();
-					final String value = subEntry.getKey();
+					final Object value = subEntry.getKey();
 					final Times times = subEntry.getValue();
 					Integer enter = null;
 					Integer exit = null;
@@ -292,15 +364,15 @@ public class DynamicGraph {
 	public class Node {
 		private final String id;
 		private final String label;
-		private final Map<String,String> staticAttrs;
+		private final StaticAttributes staticAttrs;
 		private final DynamicAttributes dynamicAttrs;
 		private final Set<Edge> edges;
 		private final Times times = new Times();
 		public Node(String id, String label) {
 			this.id = id;
 			this.label = label;
-			this.staticAttrs = new SetUpdatingMap<String,String>(nodeStaticAttributeIDs, nextNodeAttrID);
-			this.dynamicAttrs = new DynamicAttributes(nodeDynamicAttributeIDs, nextNodeAttrID);
+			this.staticAttrs = new StaticAttributes(nodeStaticAttrs, nodeAttrIDs, nextNodeAttrID);
+			this.dynamicAttrs = new DynamicAttributes(nodeDynamicAttrs, nodeAttrIDs, nextNodeAttrID);
 			this.edges = new HashSet<Edge>();
 		}
 		
@@ -338,8 +410,8 @@ public class DynamicGraph {
 				gexf.append(">\n");
 				gexf.append("\t\t\t\t<attvalues>\n");
 				
-				for(Entry<String,String> entry : staticAttrs.entrySet()) {
-					gexf.append("\t\t\t\t\t<attvalue for=\"" + nodeStaticAttributeIDs.get(entry.getKey()) + "\" value=\"" + entry.getValue() + "\"/>\n");
+				for(Entry<String,Object> entry : staticAttrs.entrySet()) {
+					gexf.append("\t\t\t\t\t<attvalue for=\"" + nodeAttrIDs.get(entry.getKey()) + "\" value=\"" + entry.getValue() + "\"/>\n");
 				}
 				gexf.append(dynamicAttrs.toGEXFAttValues());
 				
@@ -376,7 +448,7 @@ public class DynamicGraph {
 		private final String id;
 		private final Node node1;
 		private final Node node2;
-		private final Map<String,String> staticAttrs;
+		private final StaticAttributes staticAttrs;
 		private final DynamicAttributes dynamicAttrs;
 		private final Times times = new Times();
 		public Edge(final String id, final String node1ID, final String node2ID) {
@@ -385,8 +457,8 @@ public class DynamicGraph {
 			this.node2 = nodes.get(node2ID);
 			if(this.node1 == null) throw new IllegalArgumentException();
 			if(this.node2 == null) throw new IllegalArgumentException();
-			this.staticAttrs = new SetUpdatingMap<String,String>(edgeStaticAttributeIDs, nextEdgeAttrID);
-			this.dynamicAttrs = new DynamicAttributes(edgeDynamicAttributeIDs, nextEdgeAttrID);
+			this.staticAttrs = new StaticAttributes(edgeStaticAttrs, edgeAttrIDs, nextEdgeAttrID);
+			this.dynamicAttrs = new DynamicAttributes(edgeDynamicAttrs, edgeAttrIDs, nextEdgeAttrID);
 			
 			this.node1.edges.add(this);
 			this.node2.edges.add(this);
@@ -426,8 +498,8 @@ public class DynamicGraph {
 			} else {
 				gexf.append(">\n");
 				gexf.append("\t\t\t\t<attvalues>\n");
-				for(Entry<String,String> entry : staticAttrs.entrySet()) {
-					gexf.append("\t\t\t\t\t<attvalue for=\"" + edgeStaticAttributeIDs.get(entry.getKey()) + "\" value=\"" + entry.getValue() + "\"/>\n");
+				for(Entry<String,Object> entry : staticAttrs.entrySet()) {
+					gexf.append("\t\t\t\t\t<attvalue for=\"" + edgeAttrIDs.get(entry.getKey()) + "\" value=\"" + entry.getValue() + "\"/>\n");
 				}
 				gexf.append(dynamicAttrs.toGEXFAttValues());
 				gexf.append("\t\t\t\t</attvalues>\n");
@@ -465,14 +537,19 @@ public class DynamicGraph {
 	private int time = 0;
 	private final Directionality directionality; 
 	private int nextEdgeID = 0;
+	private int minTime = Integer.MAX_VALUE;
+	private int maxTime = Integer.MIN_VALUE;
+	private final Map<String,Class<?>> attributeTypes = new HashMap<String,Class<?>>();
 	private final MutableInt nextNodeAttrID = new MutableInt(0);
 	private final MutableInt nextEdgeAttrID = new MutableInt(0);
 	private final Map<String,Node> nodes = new HashMap<String,Node>();
 	private final Map<String,Edge> edges = new HashMap<String,Edge>();
-	private final Map<String,Integer> nodeStaticAttributeIDs = new HashMap<String,Integer>();
-	private final Map<String,Integer> nodeDynamicAttributeIDs = new HashMap<String,Integer>();
-	private final Map<String,Integer> edgeStaticAttributeIDs = new HashMap<String,Integer>();
-	private final Map<String,Integer> edgeDynamicAttributeIDs = new HashMap<String,Integer>();
+	private final Set<String> nodeStaticAttrs = new HashSet<String>();
+	private final Set<String> nodeDynamicAttrs = new HashSet<String>();
+	private final Set<String> edgeStaticAttrs = new HashSet<String>();
+	private final Set<String> edgeDynamicAttrs = new HashSet<String>();
+	private final Map<String,Integer> nodeAttrIDs = new HashMap<String,Integer>();
+	private final Map<String,Integer> edgeAttrIDs = new HashMap<String,Integer>();
 	
 	public DynamicGraph(final Directionality directionality) {
 		this.directionality = directionality;
@@ -548,49 +625,80 @@ public class DynamicGraph {
 //		gexf.append("\t\t<description>A graph</description>\n");
 //		gexf.append("\t</meta>\n");
 		
-		gexf.append("\t<graph mode=\"dynamic\" defaultedgetype=\"");
+		gexf.append("\t<graph mode=\"dynamic\"");
+		gexf.append(" defaultedgetype=\"");
 		if(directionality.equals(Directionality.UNDIRECTED))
 			gexf.append("un");
-		gexf.append("directed\">\n");
+		gexf.append("directed\"");
+		gexf.append(" dateformat=\"double\"");
+		
+		gexf.append(" start=\"");
+		gexf.append(minTime);
+		gexf.append("\" end=\"");
+		gexf.append(maxTime);
+		gexf.append("\"");
+		
+		gexf.append(">\n");
 		
 		/*** Attributes Declaration ***/
 		
-		if(!nodeStaticAttributeIDs.isEmpty()) {
+		if(!nodeStaticAttrs.isEmpty()) {
 			gexf.append("\t\t<attributes class=\"node\" mode=\"static\">\n");
-			for(Entry<String,Integer> entry : nodeStaticAttributeIDs.entrySet()) {
-				final String staticAttr = entry.getKey();
-				final Integer id = entry.getValue();
-				gexf.append("\t\t\t<attribute id=\"" + id + "\" title=\"" + staticAttr + "\" type=\"string\"/>\n");
+			for(final String staticAttr : nodeStaticAttrs) {
+				final Integer id = nodeAttrIDs.get(staticAttr);
+				gexf.append("\t\t\t<attribute id=\"");
+				gexf.append(id);
+				gexf.append("\" title=\"");
+				gexf.append(staticAttr);
+				gexf.append("\" type=\"");
+				gexf.append(typeNameForAttr(staticAttr));
+				gexf.append("\"/>\n");
 			}
 			gexf.append("\t\t</attributes>\n");
 		}
 		
-		if(!nodeDynamicAttributeIDs.isEmpty()) {
+		if(!nodeDynamicAttrs.isEmpty()) {
 			gexf.append("\t\t<attributes class=\"node\" mode=\"dynamic\">\n");
-			for(Entry<String,Integer> entry : nodeDynamicAttributeIDs.entrySet()) {
-				final String dynamicAttr = entry.getKey();
-				final Integer id = entry.getValue();
-				gexf.append("\t\t\t<attribute id=\"" + id + "\" title=\"" + dynamicAttr + "\" type=\"string\"/>\n");
+			for(final String dynamicAttr : nodeDynamicAttrs) {
+				final Integer id = nodeAttrIDs.get(dynamicAttr);
+				gexf.append("\t\t\t<attribute id=\"");
+				gexf.append(id);
+				gexf.append("\" title=\"");
+				gexf.append(dynamicAttr);
+				gexf.append("\" type=\"");
+				gexf.append(typeNameForAttr(dynamicAttr));
+				gexf.append("\"/>\n");
 			}
 			gexf.append("\t\t</attributes>\n");
 		}
 		
-		if(!edgeStaticAttributeIDs.isEmpty()) {
+		if(!edgeStaticAttrs.isEmpty()) {
 			gexf.append("\t\t<attributes class=\"edge\" mode=\"static\">\n");
-			for(Entry<String,Integer> entry : edgeStaticAttributeIDs.entrySet()) {
-				final String staticAttr = entry.getKey();
-				final Integer id = entry.getValue();
-				gexf.append("\t\t\t<attribute id=\"" + id + "\" title=\"" + staticAttr + "\" type=\"float\"/>\n");
+			for(final String staticAttr : edgeStaticAttrs) {
+				final Integer id = edgeAttrIDs.get(staticAttr);
+				gexf.append("\t\t\t<attribute id=\"");
+				gexf.append(id);
+				gexf.append("\" title=\"");
+				gexf.append(staticAttr);
+				gexf.append("\" type=\"");
+				gexf.append(typeNameForAttr(staticAttr));
+				gexf.append("\"/>\n");
 			}
 			gexf.append("\t\t</attributes>\n");
 		}
 		
-		if(!edgeDynamicAttributeIDs.isEmpty()) {
+		if(!edgeDynamicAttrs.isEmpty()) {
 			gexf.append("\t\t<attributes class=\"edge\" mode=\"dynamic\">\n");
-			for(Entry<String,Integer> entry : edgeDynamicAttributeIDs.entrySet()) {
-				final String dynamicAttr = entry.getKey();
-				final Integer id = entry.getValue();
-				gexf.append("\t\t\t<attribute id=\"" + id + "\" title=\"" + dynamicAttr + "\" type=\"float\"/>\n");
+			for(final String dynamicAttr : edgeDynamicAttrs) {
+				assert(dynamicAttr != null);
+				final Integer id = edgeAttrIDs.get(dynamicAttr);
+				gexf.append("\t\t\t<attribute id=\"");
+				gexf.append(id);
+				gexf.append("\" title=\"");
+				gexf.append(dynamicAttr);
+				gexf.append("\" type=\"");
+				gexf.append(typeNameForAttr(dynamicAttr));
+				gexf.append("\"/>\n");
 			}
 			gexf.append("\t\t</attributes>\n");
 		}
@@ -641,6 +749,28 @@ public class DynamicGraph {
 	
 	public Edge getEdge(final String edgeID) {
 		return edges.get(edgeID);
+	}
+	
+	private String typeNameForAttr(final String attr) {
+		Class<?> type = attributeTypes.get(attr);
+		if(type.equals(String.class))
+			return "string";
+		else if(type.equals(Double.class))
+			return "double";
+		else if(type.equals(Integer.class))
+			return "integer";
+		else if(type.equals(Boolean.class))
+			return "boolean";
+		else if(type.equals(Float.class))
+			return "float";
+		else if(type.equals(Date.class))
+			return "date";
+		else throw new IllegalArgumentException("Type " + type.getSimpleName() + " not supported");
+	}
+	
+	private void timeSeen(final int time) {
+		if(time < minTime) minTime = time;
+		if(time > maxTime) maxTime = time;
 	}
 	
 	public static void main(String[] args) {

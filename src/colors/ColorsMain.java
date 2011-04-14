@@ -43,6 +43,7 @@ import colors.ratings.GroupedRatingGenerator;
 import colors.ratings.RandomRatingGenerator;
 import colors.sys.AffinitiesGraphRecorder;
 import colors.sys.AffinitiesRecorder;
+import colors.sys.Gexf4JAffinityRecorder;
 import colors.sys.MultiAgentSystem;
 import colors.sys.PublicationMatrixRecorder;
 import colors.sys.ResultDumper;
@@ -248,7 +249,7 @@ public class ColorsMain {
 			}
 		}
 		
-		name.append("_moderateEntropy_uniformAffinInit4");
+		name.append("_moderateEntropy_uniformAffinInit10");
 		
 		return name.toString();
 	}
@@ -267,16 +268,23 @@ public class ColorsMain {
 		Util.initLogging();
 		final String runID = runIdentifier();
 		saveProps(outputDir + "/props/" + runID + ".properties");
-		sys.addListener(new AffinitiesRecorder(outputDir + "/affinities/" + runID + ".txt"));
-		sys.addListener(new PublicationMatrixRecorder(outputDir + "/pubmatrix/" + runID + ".txt"));
-		sys.addListener(new ResultDumper(outputDir+"/results/" + runID + ".txt"));
 		
-		final String affinitiesGraphFilename = outputDir + "/gexf/" + runID + ".gexf";
-		final AffinitiesGraphRecorder agr = new AffinitiesGraphRecorder(sys, affinitiesGraphFilename);
-		sys.addListener(agr);
+		configureListeners(runID);
 		
 		sys.run(iterations);
 		System.out.println("\nGenerated " + runIdentifier());
+	}
+	
+	private void configureListeners(final String runID) {
+//		sys.addListener(new AffinitiesRecorder(outputDir + "/affinities/" + runID + ".txt"));
+//		sys.addListener(new PublicationMatrixRecorder(outputDir + "/pubmatrix/" + runID + ".txt"));
+//		sys.addListener(new ResultDumper(outputDir+"/results/" + runID + ".txt"));
+		
+		final String affinitiesGraphFilename = outputDir + "/gexf/" + runID + ".gexf";
+//		final AffinitiesGraphRecorder agr = new AffinitiesGraphRecorder(sys, affinitiesGraphFilename);
+//		sys.addListener(agr);
+		final Gexf4JAffinityRecorder g4jar = new Gexf4JAffinityRecorder(affinitiesGraphFilename);
+		sys.addListener(g4jar);
 	}
 	
 	private void saveProps(final String toFile) {
@@ -306,7 +314,7 @@ public class ColorsMain {
 	public static void main(String[] args) {
 		final ColorsMain main = new ColorsMain();
 		
-		main.setIterations(100);
+		main.setIterations(3);
 		main.setProp(Props.ARTGEN_COPYCAT_WEIGHT, 0.01);
 //		main.setProp(Props.PUBDEC_EXUBERANT_WEIGHT, 0.1);
 //		main.setProp(RANDOM_RATING_WEIGHT, 0.2);
@@ -316,7 +324,7 @@ public class ColorsMain {
 		main.setProp(Props.SUCK_UP_TO_THIS_MANY_AGENTS, 5);
 		main.setProp(Props.ORDER_ARTEFACTS_RANDOMLY, true);
 		main.setProp(Props.STEP_SIZE, 0.03);
-		main.setProp(Props.MOD_ENT_OFFSET, 0.5);
+		main.setProp(Props.MOD_ENT_OFFSET, 2.0);
 		
 		main.setAgentCount(AgentType.STANDARD, 10);
 		main.addAgents();

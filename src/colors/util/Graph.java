@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,15 +14,23 @@ import java.util.Set;
 
 public class Graph {
 	/** This helps us maintain a global list of attributes based on which ones are set at the node and edge level */
-	public static class SetUpdatingMap<K,V> extends HashMap<K,V> {
-		private final Set<K> set;
+	public class SetUpdatingMap extends HashMap<String,Object> {
+		private final Set<String> set;
 		
-		public SetUpdatingMap(Set<K> set) {
+		public SetUpdatingMap(Set<String> set) {
 			this.set = set;
 		}
 
 		@Override
-		public V put(K key, V value) {
+		public Object put(String key, Object value) {
+			if(!(value instanceof String || value instanceof Double || value instanceof Integer || value instanceof Float || value instanceof Boolean || value instanceof Date))
+				throw new IllegalArgumentException("Type " + value.getClass().getSimpleName() + " not supported");
+			Class<?> cls = attributeTypes.get(key);
+			if(cls == null) {
+				attributeTypes.put(key, value.getClass());
+			} else {
+				if(!cls.equals(value.getClass())) throw new IllegalArgumentException("Type mismatch! Should be " + cls.getSimpleName() + " but was " + value.getClass().getSimpleName());
+			}
 			this.set.add(key);
 			return super.put(key, value);
 		}
@@ -30,16 +39,16 @@ public class Graph {
 	public class Node {
 		private final String id;
 		private final String label;
-		private final Map<String,String> attributes;
+		private final Map<String,Object> attributes;
 		private final Set<Edge> edges;
 		public Node(String id, String label) {
 			this.id = id;
 			this.label = label;
-			this.attributes = new SetUpdatingMap<String,String>(nodeAttributeNames);
+			this.attributes = new SetUpdatingMap(nodeAttributeNames);
 			this.edges = new HashSet<Edge>();
 		}
 		
-		public void setAttribute(final String attribute, final String value) {
+		public void setAttribute(final String attribute, final Object value) {
 			this.attributes.put(attribute, value);
 		}
 
@@ -51,7 +60,7 @@ public class Graph {
 			return label;
 		}
 
-		public Map<String, String> getAttributes() {
+		public Map<String, Object> getAttributes() {
 			return Collections.unmodifiableMap(attributes);
 		}
 
@@ -64,20 +73,20 @@ public class Graph {
 		private final String id;
 		private final Node node1;
 		private final Node node2;
-		private final Map<String,String> attributes;
+		private final Map<String,Object> attributes;
 		public Edge(final String id, final String node1ID, final String node2ID) {
 			this.id = id;
 			this.node1 = nodes.get(node1ID);
 			this.node2 = nodes.get(node2ID);
 			if(this.node1 == null) throw new IllegalArgumentException();
 			if(this.node2 == null) throw new IllegalArgumentException();
-			this.attributes = new SetUpdatingMap<String,String>(edgeAttributeNames);
+			this.attributes = new SetUpdatingMap(edgeAttributeNames);
 			
 			this.node1.edges.add(this);
 			this.node2.edges.add(this);
 		}
 		
-		public void setAttribute(final String attribute, final String value) {
+		public void setAttribute(final String attribute, final Object value) {
 			this.attributes.put(attribute, value);
 		}
 
@@ -93,7 +102,7 @@ public class Graph {
 			return node2;
 		}
 
-		public Map<String, String> getAttributes() {
+		public Map<String, Object> getAttributes() {
 			return Collections.unmodifiableMap(attributes);
 		}
 		
@@ -106,6 +115,7 @@ public class Graph {
 	}
 	private final Directionality directionality; 
 	private int nextEdgeID = 0;
+	private final Map<String,Class<?>> attributeTypes = new HashMap<String,Class<?>>();
 	private final Set<String> nodeAttributeNames = new HashSet<String>();
 	private final Set<String> edgeAttributeNames = new HashSet<String>();
 	private final Map<String,Node> nodes = new HashMap<String,Node>();
@@ -172,82 +182,133 @@ public class Graph {
 	+ "version=\"1.2\">\n";
 	/** GEXF is a graph exchange file format supported by Gephi */
 	public String toGEXF() {
-		final StringBuilder gexf = new StringBuilder(gexfHeader);
+		final StringBuilder gexf = new StringBuilder();
+		writeGEXF(gexf);
+		return gexf.toString();
+	}
+	
+	private static void append(final Appendable[] as, final CharSequence cs) throws IOException {
+		for(final Appendable appendable : as) {
+			appendable.append(cs);
+		}
+	}
+	
+	private static void append(final Appendable[] as, final char c) throws IOException {
+		for(final Appendable appendable : as) {
+			appendable.append(c);
+		}
+	}
+	
+	private String typeNameForAttr(final String attr) {
+		Class<?> type = attributeTypes.get(attr);
+		if(type.equals(String.class))
+			return "string";
+		else if(type.equals(Double.class))
+			return "double";
+		else if(type.equals(Integer.class))
+			return "integer";
+		else if(type.equals(Boolean.class))
+			return "boolean";
+		else if(type.equals(Float.class))
+			return "float";
+		else if(type.equals(Date.class))
+			return "date";
+		else throw new IllegalArgumentException("Type " + type.getSimpleName() + " not supported");
+	}
+	
+	public void writeGEXF(final Appendable... as) {
 //		gexf.append("\t<meta lastmodifieddate=\"2009−03−20\">\n");
 //		gexf.append("\t\t<creator>Gephi.org</creator>\n");
 //		gexf.append("\t\t<description>A graph</description>\n");
 //		gexf.append("\t</meta>\n");
 		
-		gexf.append("\t<graph defaultedgetype=\"");
-		if(directionality.equals(Directionality.UNDIRECTED))
-			gexf.append("un");
-		gexf.append("directed\">\n");
-		
-		/*** Attributes Declaration ***/
-		int nextNodeAttrID = 0;
-		Map<String,Integer> nodeAttrIDs = new HashMap<String,Integer>();
-		gexf.append("\t\t<attributes class=\"node\">\n");
-		for(String nodeAttrName : nodeAttributeNames) {
-			nodeAttrIDs.put(nodeAttrName, nextNodeAttrID);
-			gexf.append("\t\t\t<attribute id=\"" + nextNodeAttrID + "\" title=\"" + nodeAttrName + "\" type=\"string\"/>\n");
-			nextNodeAttrID++;
-		}
-		gexf.append("\t\t</attributes>\n");
-		
-		int nextEdgeAttrID = 0;
-		Map<String,Integer> edgeAttrIDs = new HashMap<String,Integer>();
-		gexf.append("\t\t<attributes class=\"edge\">\n");
-		for(String edgeAttrName : edgeAttributeNames) {
-			edgeAttrIDs.put(edgeAttrName, nextEdgeAttrID);
-			gexf.append("\t\t\t<attribute id=\"" + nextEdgeAttrID + "\" title=\"" + edgeAttrName + "\" type=\"string\"/>\n");
-			nextEdgeAttrID++;
-		}
-		gexf.append("\t\t</attributes>\n");
-		
-		/*** Nodes ***/
-		gexf.append("\t\t<nodes>\n");
-		for(Node node : nodes.values()) {
-			gexf.append("\t\t\t<node id=\"" + node.id + "\" label=\"" + node.label + "\"");
-			if(node.attributes.isEmpty()) {
-				gexf.append("/>\n");
-			} else {
-				gexf.append(">\n");
-				gexf.append("\t\t\t\t<attvalues>\n");
-				for(Entry<String,String> entry : node.attributes.entrySet()) {
-					gexf.append("\t\t\t\t\t<attvalue for=\"" + nodeAttrIDs.get(entry.getKey()) + "\" value=\"" + entry.getValue() + "\"/>\n");
-				}
-				gexf.append("\t\t\t\t</attvalues>\n");
-				gexf.append("\t\t\t</node>\n");
+		try {
+			append(as, gexfHeader);
+			append(as, "\t<graph defaultedgetype=\"");
+			if(directionality.equals(Directionality.UNDIRECTED))
+				append(as, "un");
+			append(as, "directed\">\n");
+			
+			/*** Attributes Declaration ***/
+			int nextNodeAttrID = 0;
+			Map<String,Integer> nodeAttrIDs = new HashMap<String,Integer>();
+			append(as, "\t\t<attributes class=\"node\">\n");
+			for(String nodeAttrName : nodeAttributeNames) {
+				nodeAttrIDs.put(nodeAttrName, nextNodeAttrID);
+				append(as, "\t\t\t<attribute id=\"");
+				append(as, String.valueOf(nextNodeAttrID));
+				append(as, "\" title=\"");
+				append(as, nodeAttrName);
+				append(as, "\" type=\"");
+				append(as, typeNameForAttr(nodeAttrName));
+				append(as, "\"/>\n");
+				nextNodeAttrID++;
 			}
-		}
-		gexf.append("\t\t</nodes>\n");
-		
-		/*** Edges ***/
-		gexf.append("\t\t<edges>\n");
-		for(Edge edge : edges.values()) {
-			gexf.append("\t\t\t<edge id=\"" + edge.id + "\" source=\"" + edge.node1.id + "\" target=\"" + edge.node2.id + "\"");
-			if(edge.attributes.isEmpty()) {
-				gexf.append("/>\n");
-			} else {
-				gexf.append(">\n");
-				gexf.append("\t\t\t\t<attvalues>\n");
-				for(Entry<String,String> entry : edge.attributes.entrySet()) {
-					gexf.append("\t\t\t\t\t<attvalue for=\"" + edgeAttrIDs.get(entry.getKey()) + "\" value=\"" + entry.getValue() + "\"/>\n");
-				}
-				gexf.append("\t\t\t\t</attvalues>\n");
-				gexf.append("\t\t\t</edge>\n");
+			append(as, "\t\t</attributes>\n");
+			
+			int nextEdgeAttrID = 0;
+			Map<String,Integer> edgeAttrIDs = new HashMap<String,Integer>();
+			append(as, "\t\t<attributes class=\"edge\">\n");
+			for(String edgeAttrName : edgeAttributeNames) {
+				edgeAttrIDs.put(edgeAttrName, nextEdgeAttrID);
+				append(as, "\t\t\t<attribute id=\"");
+				append(as, String.valueOf(nextEdgeAttrID));
+				append(as, "\" title=\"");
+				append(as, edgeAttrName);
+				append(as, "\" type=\"");
+				append(as, typeNameForAttr(edgeAttrName));
+				append(as, "\"/>\n");
+				nextEdgeAttrID++;
 			}
+			append(as, "\t\t</attributes>\n");
+			
+			/*** Nodes ***/
+			append(as, "\t\t<nodes>\n");
+			for(Node node : nodes.values()) {
+				append(as, "\t\t\t<node id=\"" + node.id + "\" label=\"" + node.label + "\"");
+				if(node.attributes.isEmpty()) {
+					append(as, "/>\n");
+				} else {
+					append(as, ">\n");
+					append(as, "\t\t\t\t<attvalues>\n");
+					for(Entry<String,Object> entry : node.attributes.entrySet()) {
+						append(as, "\t\t\t\t\t<attvalue for=\"" + nodeAttrIDs.get(entry.getKey()) + "\" value=\"" + entry.getValue() + "\"/>\n");
+					}
+					append(as, "\t\t\t\t</attvalues>\n");
+					append(as, "\t\t\t</node>\n");
+				}
+			}
+			append(as, "\t\t</nodes>\n");
+			
+			/*** Edges ***/
+			append(as, "\t\t<edges>\n");
+			for(Edge edge : edges.values()) {
+				append(as, "\t\t\t<edge id=\"" + edge.id + "\" source=\"" + edge.node1.id + "\" target=\"" + edge.node2.id + "\"");
+				if(edge.attributes.isEmpty()) {
+					append(as, "/>\n");
+				} else {
+					append(as, ">\n");
+					append(as, "\t\t\t\t<attvalues>\n");
+					for(Entry<String,Object> entry : edge.attributes.entrySet()) {
+						append(as, "\t\t\t\t\t<attvalue for=\"" + edgeAttrIDs.get(entry.getKey()) + "\" value=\"" + entry.getValue() + "\"/>\n");
+					}
+					append(as, "\t\t\t\t</attvalues>\n");
+					append(as, "\t\t\t</edge>\n");
+				}
+			}
+			append(as, "\t\t</edges>\n");
+			append(as, "\t</graph>\n");
+			append(as, "</gexf>");
+		} catch(IOException e) {
+			e.printStackTrace();
 		}
-		gexf.append("\t\t</edges>\n");
-		gexf.append("\t</graph>\n");
-		gexf.append("</gexf>");
-		return gexf.toString();
 	}
 	
-	public void toGEXF(final String filename) {
+	public void saveToGEXF(final String filename) {
 		try {
 			BufferedWriter w = new BufferedWriter(new FileWriter(filename));
-			w.append(toGEXF());
+			writeGEXF(w);
+			w.flush();
 			w.close();
 		} catch(IOException e) {
 			e.printStackTrace();
