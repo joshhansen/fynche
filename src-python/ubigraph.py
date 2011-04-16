@@ -1,3 +1,4 @@
+#This file is from Ubigraph, under Apache 2 license (I think).
 import xmlrpclib
 
 class Ubigraph:
