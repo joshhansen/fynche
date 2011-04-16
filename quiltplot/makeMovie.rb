@@ -1,4 +1,7 @@
 #!/usr/bin/ruby
+#A script to generate "quilt plot" movies to visualize affinities between agents.
+#This script is a heavily modified version of that written by Dan Walker. I have no idea what license it is under.
+
 
 # Get the arguments from the command-line (the URL)
 if ARGV.size < 1
