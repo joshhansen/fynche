@@ -530,10 +530,6 @@ public class DynamicGraph {
 		}
 	}
 	
-	public static enum Directionality {
-		DIRECTED,
-		UNDIRECTED
-	}
 	private int time = 0;
 	private final Directionality directionality; 
 	private int nextEdgeID = 0;

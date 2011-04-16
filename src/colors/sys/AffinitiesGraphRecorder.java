@@ -1,6 +1,7 @@
 package colors.sys;
 
 import colors.interfaces.Agent;
+import colors.util.Directionality;
 import colors.util.DynamicGraph;
 import colors.util.DynamicGraph.Edge;
 
@@ -30,7 +31,7 @@ public class AffinitiesGraphRecorder extends DefaultAffinityRecorder {
 	public AffinitiesGraphRecorder(final MultiAgentSystem sys, final Type type, final String saveToFilename) {
 		this.type = type;
 		this.saveToFilename = saveToFilename;
-		this.graph = new DynamicGraph(DynamicGraph.Directionality.DIRECTED);
+		this.graph = new DynamicGraph(Directionality.DIRECTED);
 		for(Agent agent : sys.agents) {
 			graph.addNode(agent.toString());
 		}

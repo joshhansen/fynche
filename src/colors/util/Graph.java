@@ -109,10 +109,6 @@ public class Graph {
 		
 	}
 	
-	public static enum Directionality {
-		DIRECTED,
-		UNDIRECTED
-	}
 	private final Directionality directionality; 
 	private int nextEdgeID = 0;
 	private final Map<String,Class<?>> attributeTypes = new HashMap<String,Class<?>>();
