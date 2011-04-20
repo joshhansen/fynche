@@ -32,7 +32,7 @@ import javax.swing.SwingUtilities;
 import fynche.BetterProperties.NoSuchPropException;
 import fynche.affinities.AverageRatingAffinityUpdater;
 import fynche.affinities.IndifferentAffinityCombo;
-import fynche.affinities.ModerateNormalizedEntropyAffinityUpdater;
+import fynche.affinities.ModeratePreNormalizedEntropyAffinityUpdater;
 import fynche.affinities.MultiStrategyAffinityUpdater;
 import fynche.affinities.NullAffinityCombo;
 import fynche.affinities.ObsessiveAffinityCombo;
@@ -61,6 +61,7 @@ import fynche.prefs.DependentWordsPreferenceUpdater;
 import fynche.ratings.EccentricRatingGenerator;
 import fynche.ratings.EgocentricRatingGenerator;
 import fynche.ratings.GroupedRatingGenerator;
+import fynche.ratings.NullRatingCombo;
 import fynche.ratings.RandomRatingGenerator;
 import fynche.sys.AffinitiesRecorder;
 import fynche.sys.MultiAgentSystem;
@@ -123,30 +124,32 @@ public class ColorsMain {
 	}
 	
 	private Factory<? extends RatingGenerator> standardRatGenFact() {
-		try {
-			final double randomRatingWeight = props.getPropD(Props.RANDOM_RATING_WEIGHT);
-			assert(randomRatingWeight > 0.0);
-			final GroupedRatingGenerator grg = new GroupedRatingGenerator();
-			grg.addGenerator(new EgocentricRatingGenerator(), 1.0-randomRatingWeight);
-			grg.addGenerator(new RandomRatingGenerator(), randomRatingWeight);
-			return Util.staticFactory( (RatingGenerator) grg);
-		} catch (NoSuchPropException e) {
-			return EgocentricRatingGenerator.factory;
-		}
+		return NullRatingCombo.factory;
+//		try {
+//			final double randomRatingWeight = props.getPropD(Props.RANDOM_RATING_WEIGHT);
+//			assert(randomRatingWeight > 0.0);
+//			final GroupedRatingGenerator grg = new GroupedRatingGenerator();
+//			grg.addGenerator(new EgocentricRatingGenerator(), 1.0-randomRatingWeight);
+//			grg.addGenerator(new RandomRatingGenerator(), randomRatingWeight);
+//			return Util.staticFactory( (RatingGenerator) grg);
+//		} catch (NoSuchPropException e) {
+//			return EgocentricRatingGenerator.factory;
+//		}
 	}
 	
 	private Factory<? extends PublicationDecider> standardPubDecFact() {
-		final int suckUpToThisManyAgents = props.getPropI(Props.SUCK_UP_TO_THIS_MANY_AGENTS);
-		try {
-			final double exuberantWeight = props.getPropD(Props.PUBDEC_EXUBERANT_WEIGHT);
-			assert(exuberantWeight > 0.0);
-			final GroupedPublicationDecider gpd = new GroupedPublicationDecider();
-			gpd.addDecider(new CliqueishPublicationDecider(suckUpToThisManyAgents), 1.0-exuberantWeight);
-			gpd.addDecider(new ExuberantPublicationDecider(), exuberantWeight);
-			return Util.staticFactory( (PublicationDecider) gpd);
-		} catch(NoSuchPropException e) {
-			return Util.staticFactory(  (PublicationDecider)  new CliqueishPublicationDecider(suckUpToThisManyAgents));
-		}
+		return ExuberantPublicationDecider.factory;
+//		final int suckUpToThisManyAgents = props.getPropI(Props.SUCK_UP_TO_THIS_MANY_AGENTS);
+//		try {
+//			final double exuberantWeight = props.getPropD(Props.PUBDEC_EXUBERANT_WEIGHT);
+//			assert(exuberantWeight > 0.0);
+//			final GroupedPublicationDecider gpd = new GroupedPublicationDecider();
+//			gpd.addDecider(new CliqueishPublicationDecider(suckUpToThisManyAgents), 1.0-exuberantWeight);
+//			gpd.addDecider(new ExuberantPublicationDecider(), exuberantWeight);
+//			return Util.staticFactory( (PublicationDecider) gpd);
+//		} catch(NoSuchPropException e) {
+//			return Util.staticFactory(  (PublicationDecider)  new CliqueishPublicationDecider(suckUpToThisManyAgents));
+//		}
 	}
 	
 	private Factory<? extends ArtefactGenerator> standardArtGenFact() {
@@ -181,7 +184,7 @@ public class ColorsMain {
 		final double offset = props.getPropD(Props.MOD_ENT_OFFSET);
 		final double m = props.getPropD(Props.MOD_ENT_M);
 		final double stepSize = props.getPropD(Props.STEP_SIZE);
-		return Util.staticFactory((AffinityUpdater) new ModerateNormalizedEntropyAffinityUpdater(offset, m, stepSize));
+		return Util.staticFactory((AffinityUpdater) new ModeratePreNormalizedEntropyAffinityUpdater(offset, m, stepSize));
 	}
 	
 	private ModularAgentFactory randomAgentFact() {
@@ -266,7 +269,7 @@ public class ColorsMain {
 			}
 		}
 		
-		name.append("_modNormEnt_renormed_unifAffinInit");
+		name.append("_modPreNormEnt_unifAffinInit");
 		
 		return name.toString();
 	}
@@ -331,13 +334,13 @@ public class ColorsMain {
 	public static void main(String[] args) {
 		final ColorsMain main = new ColorsMain();
 		
-		main.setIterations(1000);
+		main.setIterations(100);
 		main.setProp(Props.ARTGEN_COPYCAT_WEIGHT, 0.1);
 //		main.setProp(Props.PUBDEC_EXUBERANT_WEIGHT, 0.1);
 //		main.setProp(RANDOM_RATING_WEIGHT, 0.2);
 		
 		main.setProp(Props.TOP_AGENTS_TO_PICK_FROM, 10);
-		main.setProp(Props.MAX_INITIAL_ARTEFACTS_PER_AGENT, 5000);
+		main.setProp(Props.MAX_INITIAL_ARTEFACTS_PER_AGENT, 500);//00);
 		main.setProp(Props.SUCK_UP_TO_THIS_MANY_AGENTS, 5);
 		main.setProp(Props.ORDER_ARTEFACTS_RANDOMLY, true);
 		main.setProp(Props.STEP_SIZE, 0.001);
