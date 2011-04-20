@@ -24,7 +24,7 @@ package fynche;
 
 public class Props {
 
-	static final String STEP_SIZE = "stepSize";
+	static final String OPT_STEP_SIZE = "stepSize";
 	static final String MOD_ENT_OFFSET = "offset";
 	static final String ARTGEN_COPYCAT_WEIGHT = "copycat";
 	static final String PUBDEC_EXUBERANT_WEIGHT = "exuberant";
@@ -34,5 +34,7 @@ public class Props {
 	static final String SUCK_UP_TO_THIS_MANY_AGENTS = "suckUpTo";
 	static final String ORDER_ARTEFACTS_RANDOMLY = "artRandOrder";
 	public static final String MOD_ENT_M = "modEntM";
+	public static final String MOD_ENT_STEEPNESS = "steepness";
+	public static final String MOD_ENT_HORIZ_OFFSET = "horizOffset";
 
 }

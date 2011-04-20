@@ -30,13 +30,13 @@ import fynche.util.Counter;
 import fynche.util.Rand;
 
 public class ModeratePreNormalizedEntropyAffinityUpdater implements AffinityUpdater {
-	private final double l;
-	private final double m;
+	private final double steepness;
+	private final double horizOffset;
 	private final double stepSize;
 	
-	public ModeratePreNormalizedEntropyAffinityUpdater(final double l, final double m, final double stepSize) {
-		this.l = l;
-		this.m = m;
+	public ModeratePreNormalizedEntropyAffinityUpdater(final double steepness, final double horizOffset, final double stepSize) {
+		this.steepness = steepness;
+		this.horizOffset = horizOffset;
 		this.stepSize = stepSize;
 	}
 
@@ -68,9 +68,10 @@ public class ModeratePreNormalizedEntropyAffinityUpdater implements AffinityUpda
 		final double sum = sum(affins);
 		final double normedEntropy = entropy(affins, sum);
 		final double w_star = affins.getCount(withRespectToThisAgent);
-		final double firstTerm = 2*l*normedEntropy + m;
+		final double firstTerm = 2*steepness*(normedEntropy - horizOffset);
 		final double secondTerm = smartLog(w_star / sum) - 1.0;
-		return firstTerm * secondTerm;
+		final double thirdTerm = normedEntropy;
+		return firstTerm * secondTerm - thirdTerm;
 	}
 
 	private static <A> double entropy(final Counter<A> dist, final double sum) {

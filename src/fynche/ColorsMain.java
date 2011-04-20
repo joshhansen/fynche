@@ -181,10 +181,10 @@ public class ColorsMain {
 //		affinUpFacts.normalize();
 //		return new GroupedFactory<AffinityUpdater>(affinUpFacts);
 		
-		final double offset = props.getPropD(Props.MOD_ENT_OFFSET);
-		final double m = props.getPropD(Props.MOD_ENT_M);
-		final double stepSize = props.getPropD(Props.STEP_SIZE);
-		return Util.staticFactory((AffinityUpdater) new ModeratePreNormalizedEntropyAffinityUpdater(offset, m, stepSize));
+		final double offset = props.getPropD(Props.MOD_ENT_HORIZ_OFFSET);
+		final double steepness = props.getPropD(Props.MOD_ENT_STEEPNESS);
+		final double stepSize = props.getPropD(Props.OPT_STEP_SIZE);
+		return Util.staticFactory((AffinityUpdater) new ModeratePreNormalizedEntropyAffinityUpdater(steepness, offset, stepSize));
 	}
 	
 	private ModularAgentFactory randomAgentFact() {
@@ -343,9 +343,13 @@ public class ColorsMain {
 		main.setProp(Props.MAX_INITIAL_ARTEFACTS_PER_AGENT, 500);//00);
 		main.setProp(Props.SUCK_UP_TO_THIS_MANY_AGENTS, 5);
 		main.setProp(Props.ORDER_ARTEFACTS_RANDOMLY, true);
-		main.setProp(Props.STEP_SIZE, 0.001);
-		main.setProp(Props.MOD_ENT_OFFSET, 0.5);
-		main.setProp(Props.MOD_ENT_M, 0.0);
+		
+		main.setProp(Props.OPT_STEP_SIZE, 0.001);
+//		main.setProp(Props.MOD_ENT_OFFSET, 0.5);
+//		main.setProp(Props.MOD_ENT_M, 0.0);
+		
+		main.setProp(Props.MOD_ENT_HORIZ_OFFSET, 0.5);
+		main.setProp(Props.MOD_ENT_STEEPNESS, 1.0);
 		
 		main.setAgentCount(AgentType.STANDARD, 10);
 		main.addAgents();
